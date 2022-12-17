@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "assets",
+			"path": "../../../../../take/assets"
+		},
+		{
+			"name": "take_web",
+			"path": "../../../.."
+		}
+	],
+	"settings": {}
+}
