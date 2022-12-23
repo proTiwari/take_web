@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/change_notifier.dart';
+import 'package:take_web/web/Widgets/bottom_nav_bar.dart';
 import 'package:take_web/web/globar_variables/globals.dart' as globals;
-
 import '../models/property_model.dart';
+import '../models/user_model.dart';
 
 FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -11,7 +13,6 @@ class FirebaseServices extends ChangeNotifier {
   List valuedata = [];
   List owerpropertydata = [];
   getProperties() async {
-    await getUser();
     valuedata = [];
     try {
       print("ffff");
@@ -56,9 +57,9 @@ class FirebaseServices extends ChangeNotifier {
                     paymentduration: value.get("paymentduration"),
                   ),
                   valuedata.add(propertyModel),
-
                 })
-            .whenComplete(() => {}).catchError((error) {
+            .whenComplete(() => {})
+            .catchError((error) {
           //This is my third error handler
           valuedata = [];
           print("Missed first two error handlers. Got this error:");
@@ -77,6 +78,28 @@ class FirebaseServices extends ChangeNotifier {
       notifyListeners();
       print("here is the error: ${e.toString()}");
     }
+  }
+
+  Stream<UserModel?> get currentUserDetails {
+    return FirebaseFirestore.instance
+        .collection('Users')
+        .doc(FirebaseAuth.instance.currentUser?.uid)
+        .snapshots()
+        .map(
+          (documentSnapshot) => UserModel(
+            name: (documentSnapshot.data()!["name"] == '')
+                ? 'Enter Your Name'
+                : documentSnapshot.data()!["name"],
+            id: documentSnapshot.data()!["id"],
+            email: (documentSnapshot.data()!["email"] == '')
+                ? 'Enter Your Email'
+                : documentSnapshot.data()!["email"],
+            phone: documentSnapshot.data()!["phone"],
+            address: documentSnapshot.data()!["address"],
+            profileImage: documentSnapshot.data()!['profileImage'],
+            properties: documentSnapshot.data()!['properties'],
+          ),
+        );
   }
 
   getOwnerProperties(data) async {
@@ -98,34 +121,34 @@ class FirebaseServices extends ChangeNotifier {
             .doc(dd[1])
             .get()
             .then((value) => {
-          propertyModel = PropertyModel(
-            city: value.get("city"),
-            state: value.get("state"),
-            propertyId: value.get("propertyId"),
-            propertyimage: value.get("propertyimage"),
-            pincode: value.get("pincode"),
-            streetaddress: value.get("streetaddress"),
-            wantto: value.get("wantto"),
-            advancemoney: value.get("advancemoney"),
-            numberofrooms: value.get("numberofrooms"),
-            amount: value.get("amount"),
-            propertyname: value.get("propertyname"),
-            areaofland: value.get("areaofland"),
-            numberoffloors: value.get("numberoffloors"),
-            ownername: value.get("ownername"),
-            mobilenumber: value.get("mobilenumber"),
-            whatsappnumber: value.get("whatsappnumber"),
-            email: value.get("email"),
-            description: value.get("description"),
-            servicetype: value.get("servicetype"),
-            sharing: value.get('sharing'),
-            foodservice: value.get("foodservice"),
-            paymentduration: value.get("paymentduration"),
-          ),
-          owerpropertydata.add(propertyModel),
-
-        })
-            .whenComplete(() => {}).catchError((error) {
+                  propertyModel = PropertyModel(
+                    city: value.get("city"),
+                    state: value.get("state"),
+                    propertyId: value.get("propertyId"),
+                    propertyimage: value.get("propertyimage"),
+                    pincode: value.get("pincode"),
+                    streetaddress: value.get("streetaddress"),
+                    wantto: value.get("wantto"),
+                    advancemoney: value.get("advancemoney"),
+                    numberofrooms: value.get("numberofrooms"),
+                    amount: value.get("amount"),
+                    propertyname: value.get("propertyname"),
+                    areaofland: value.get("areaofland"),
+                    numberoffloors: value.get("numberoffloors"),
+                    ownername: value.get("ownername"),
+                    mobilenumber: value.get("mobilenumber"),
+                    whatsappnumber: value.get("whatsappnumber"),
+                    email: value.get("email"),
+                    description: value.get("description"),
+                    servicetype: value.get("servicetype"),
+                    sharing: value.get('sharing'),
+                    foodservice: value.get("foodservice"),
+                    paymentduration: value.get("paymentduration"),
+                  ),
+                  owerpropertydata.add(propertyModel),
+                })
+            .whenComplete(() => {})
+            .catchError((error) {
           //This is my third error handler
           owerpropertydata = [];
           print("Missed first two error handlers. Got this error:");
@@ -144,10 +167,6 @@ class FirebaseServices extends ChangeNotifier {
     }
   }
 }
-
-
-
-
 
 void listProperty({
   var state,
@@ -238,40 +257,50 @@ getUser() async {
 }
 
 getproperty(city) async {
-  var valuedata;
-  valuedata = await FirebaseFirestore.instance
-      .collection("State")
-      .doc("City")
-      .collection(city)
-      .get()
-      .then((value) => value.docs
-          .map((doc) => {
-                'id': doc['id'],
-                'state': doc['state'],
-                'city': doc['city'],
-                'propertyId': doc['propertyId'],
-                'propertyimage': doc['propertyimage'],
-                'pincode': doc['pincode'],
-                'streetaddress': doc['streetaddress'],
-                'wantto': doc['wantto'],
-                'advancemoney': doc['advancemoney'],
-                'numberofrooms': doc['numberofrooms'],
-                'amount': doc['amount'],
-                'propertyname': doc['propertyname'],
-                'areaofland': doc['areaofland'],
-                'numberoffloors': doc['numberoffloors'],
-                'ownername': doc['ownername'],
-                'mobilenumber': doc['mobilenumber'],
-                'whatsappnumber': doc['whatsappnumber'],
-                'email': doc['email'],
-                'description': doc['description'],
-                'servicetype': doc['servicetype'],
-                'sharing': doc['sharing'],
-                'foodservice': doc['foodservice'],
-                'paymentduration': doc['paymentduration'],
-              })
-          .toList());
-  print("valuedata ${valuedata}");
-  globals.property = valuedata;
-  return valuedata;
+  try {
+    print("sdfsd");
+    var valuedata;
+    valuedata = await FirebaseFirestore.instance
+        .collection("State")
+        .doc("City")
+        .collection(city)
+        .get()
+        .then((value) => value.docs
+            .map((doc) => {
+                  'id': doc['id'],
+                  'state': doc['state'],
+                  'city': doc['city'],
+                  'propertyId': doc['propertyId'],
+                  'propertyimage': doc['propertyimage'],
+                  'pincode': doc['pincode'],
+                  'streetaddress': doc['streetaddress'],
+                  'wantto': doc['wantto'],
+                  'advancemoney': doc['advancemoney'],
+                  'numberofrooms': doc['numberofrooms'],
+                  'amount': doc['amount'],
+                  'propertyname': doc['propertyname'],
+                  'areaofland': doc['areaofland'],
+                  'numberoffloors': doc['numberoffloors'],
+                  'ownername': doc['ownername'],
+                  'mobilenumber': doc['mobilenumber'],
+                  'whatsappnumber': doc['whatsappnumber'],
+                  'email': doc['email'],
+                  'description': doc['description'],
+                  'servicetype': doc['servicetype'],
+                  'sharing': doc['sharing'],
+                  'foodservice': doc['foodservice'],
+                  'paymentduration': doc['paymentduration'],
+                })
+            .toList())
+        .catchError((error) {
+      print(error);
+    });
+    print("valuedata ${valuedata}");
+    globals.property = valuedata;
+    return valuedata;
+  } catch (e) {
+    print(e.toString());
+    globals.property = [];
+    return [];
+  }
 }

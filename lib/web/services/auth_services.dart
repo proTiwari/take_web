@@ -1,13 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../helper/helper_functions.dart';
 import '../helpers/enum.dart';
+import '../models/user_model.dart';
 import 'database_service.dart';
 
 class AuthService {
   AuthService._();
-
-
 
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
 
@@ -15,7 +15,7 @@ class AuthService {
   Future loginWithUserNameandPassword(String email, String password) async {
     try {
       User user = (await firebaseAuth.signInWithEmailAndPassword(
-          email: email, password: password))
+              email: email, password: password))
           .user!;
 
       if (user != null) {
@@ -55,10 +55,29 @@ class AuthService {
       return null;
     }
   }
+
   static var instance = AuthService._();
 
   User? currentUser() {
     return FirebaseAuth.instance.currentUser;
+  }
+
+  Future<UserModel> getUserDetails() async {
+    try {
+      User currentUser = firebaseAuth.currentUser!;
+      print(currentUser.uid);
+
+      DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(currentUser.uid)
+          .get();
+
+      return UserModel.fromSnap(documentSnapshot);
+    } catch (e) {
+      print("weojfwijefow");
+      print(e.toString());
+    }
+    return UserModel();
   }
 
   //sign up authentication

@@ -152,19 +152,19 @@ class _OtpLoginPageState extends State<OtpLoginPage> {
                           text: TextSpan(
                             style: defaultStyle,
                             children: <TextSpan>[
-                              const TextSpan(text: "Don't have an account?"),
-                              TextSpan(
-                                  text: 'Sign Up',
-                                  style: linkStyle,
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-                                      print("signup");
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  SignUpPage()));
-                                    })
+                              // const TextSpan(text: "Don't have an account?"),
+                              // TextSpan(
+                              //     text: 'Sign Up',
+                              //     style: linkStyle,
+                              //     recognizer: TapGestureRecognizer()
+                              //       ..onTap = () {
+                              //         print("signup");
+                              //         Navigator.push(
+                              //             context,
+                              //             MaterialPageRoute(
+                              //                 builder: (context) =>
+                              //                     SignUpPage("")));
+                              //       })
                             ],
                           ),
                         ),

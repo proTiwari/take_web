@@ -8,7 +8,9 @@ import 'package:take_web/web/pages/signin_page/sign_in.provider.dart';
 import 'package:take_web/web/pages/signup_page/signup_provider.dart';
 
 class SignUpPage extends StatefulWidget {
-  SignUpPage({Key? key}) : super(key: key);
+  var verificationId;
+  var phone;
+  SignUpPage(this.verificationId, this.phone, {Key? key}) : super(key: key);
 
   @override
   State<SignUpPage> createState() => _SignUpPageState();
@@ -24,7 +26,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
   static final RegExp email = RegExp(
       r'^(([^<>()[\]\\.,;:\s@\”]+(\.[^<>()[\]\\.,;:\s@\”]+)*)|(\”.+\”))@((\[[0–9]{1,3}\.[0–9]{1,3}\.[0–9]{1,3}\.[0–9]{1,3}\])|(([a-zA-Z\-0–9]+\.)+[a-zA-Z]{2,}))$');
-
+  final _codeController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -157,29 +159,28 @@ class _SignUpPageState extends State<SignUpPage> {
                           SizedBox(
                             width: 260,
                             height: 78,
-                            child: TextFormField(
-                              maxLength: 10,
-                              controller: _phoneController,
-                              validator: (value) {
-                                if (value.toString().isEmpty) {
-                                  return 'Please enter phone number';
-                                }
-
-                                if (value.toString().length < 10) {
-                                  return 'Please enter a valid phone number';
-                                }
-                              },
-                              keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                  suffix: Icon(
-                                    FontAwesomeIcons.phone,
-                                    color: Colors.red,
-                                  ),
-                                  labelText: "Phone Number",
-                                  border: OutlineInputBorder(
-                                    borderRadius:
-                                        BorderRadius.all(Radius.circular(8)),
-                                  )),
+                            child: SizedBox(
+                              width: 260,
+                              height: 60,
+                              child: TextFormField(
+                                validator: (value) {
+                                  if (value.toString().isEmpty) {
+                                    return 'Please enter OTP';
+                                  }
+                                  if (value.toString().length < 6) {
+                                    return 'Please enter a valid OTP';
+                                  }
+                                },
+                                maxLength: 6,
+                                controller: _codeController,
+                                keyboardType: TextInputType.number,
+                                decoration: const InputDecoration(
+                                    labelText: "OTP",
+                                    border: OutlineInputBorder(
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(8)),
+                                    )),
+                              ),
                             ),
                           ),
                           const SizedBox(
@@ -192,32 +193,14 @@ class _SignUpPageState extends State<SignUpPage> {
                               if (_formKey.currentState!.validate()) {
                                 setState(() {
                                   provider.loading = true;
-
                                 });
-                                print("in");
-                                var ifexists = await FirebaseFirestore.instance
-                                    .collection("Users")
-                                    .where("phone",
-                                        isEqualTo:
-                                            "+91${_phoneController.text}")
-                                    .get();
-                                try{
-                                  provider.loading = false;
-                                  setState(() {
-                                    loading = false;
-                                  });
-                                  final userSnapshot = ifexists.docs.first;
-                                  logintoyouraccount(context);
-                                  print("if exists : ${userSnapshot}");
-
-                                }catch(e){
-                                  print("--exists--${e}");
-                                  provider.signupUser(
-                                    "+91${_phoneController.text}", emailfield.text.toString(), name.text.toString(), uid, context, );
-                                }
-
-
-
+                                provider.verify(
+                                    _codeController.text,
+                                    context,
+                                    widget.verificationId,
+                                    name.text,
+                                    emailfield.text,
+                                    widget.phone.toString());
                               }
                             },
                             child: Container(
@@ -236,7 +219,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                         Color(0xFFF27121),
                                       ])),
                               child: Padding(
-                                padding: EdgeInsets.all(12.0),
+                                padding: const EdgeInsets.all(12.0),
                                 child: provider.loading && loading == true
                                     ? const SizedBox(
                                         height: 20,
@@ -259,29 +242,29 @@ class _SignUpPageState extends State<SignUpPage> {
                           const SizedBox(
                             height: 17,
                           ),
-                          RichText(
-                            text: TextSpan(
-                              style: defaultStyle,
-                              children: <TextSpan>[
-                                const TextSpan(
-                                    text: "already have an account?"),
-                                TextSpan(
-                                    text: 'SignIn',
-                                    style: linkStyle,
-                                    recognizer: TapGestureRecognizer()
-                                      ..onTap = () {
-                                        print("signin");
-                                        Navigator.pushAndRemoveUntil<void>(
-                                          context,
-                                          MaterialPageRoute<void>(
-                                              builder: (BuildContext context) =>
-                                                  LoginApp()),
-                                          ModalRoute.withName('/signin'),
-                                        );
-                                      })
-                              ],
-                            ),
-                          ),
+                          // RichText(
+                          // text: TextSpan(
+                          //   style: defaultStyle,
+                          //   children: <TextSpan>[
+                          //     const TextSpan(
+                          //         text: "already have an account?"),
+                          //     TextSpan(
+                          //         text: 'SignIn',
+                          //         style: linkStyle,
+                          //         recognizer: TapGestureRecognizer()
+                          //           ..onTap = () {
+                          //             print("signin");
+                          //             // Navigator.pushAndRemoveUntil<void>(
+                          //             //   context,
+                          //             //   MaterialPageRoute<void>(
+                          //             //       builder: (BuildContext context) =>
+                          //             //           LoginApp()),
+                          //             //   ModalRoute.withName('/signin'),
+                          //             // );
+                          // //           })
+                          //   ],
+                          // ),
+                          // ),
                           // const Text(
                           //   "Don't have an account? Sign Up",
                           //   style: TextStyle(fontWeight: FontWeight.bold),
@@ -341,8 +324,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 Navigator.pushAndRemoveUntil<void>(
                   context,
                   MaterialPageRoute<void>(
-                      builder: (BuildContext context) =>
-                          LoginApp(),
+                    builder: (BuildContext context) => LoginApp(),
                   ),
                   ModalRoute.withName('/login'),
                 );
@@ -354,4 +336,3 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 }
-

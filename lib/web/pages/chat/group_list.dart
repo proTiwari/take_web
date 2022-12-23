@@ -59,24 +59,23 @@ class _GroupListPageState extends State<GroupListPage> {
       await DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid, "sdsf")
           .getUserGroups()
           .then((snapshots) {
-            if(snapshots == null){
-              setState(() {
-                shownomassagetext = true;
-              });
-            }
+        if (snapshots == null) {
+          setState(() {
+            shownomassagetext = true;
+          });
+        }
 
         print("sdfsdfgggggggd${snapshots.runtimeType}");
-            snapshots.data['groups'].length;
+        snapshots.data['groups'].length;
         setState(() {
           groups = snapshots;
-          try{
+          try {
             print("sdfsfsdfsds${snapshots.data()?["groups"]}");
-          }catch(e){
+          } catch (e) {
             setState(() {
               shownomassagetext = true;
             });
           }
-
         });
       });
     } catch (e) {
@@ -89,9 +88,9 @@ class _GroupListPageState extends State<GroupListPage> {
 
   @override
   Widget build(BuildContext context) {
+    var width = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
-
         actions: [
           // IconButton(
           //   onPressed: () {
@@ -104,7 +103,6 @@ class _GroupListPageState extends State<GroupListPage> {
           //     Icons.search,
           //   ),
           // ),
-
         ],
         automaticallyImplyLeading: false,
         elevation: 0,
@@ -217,7 +215,7 @@ class _GroupListPageState extends State<GroupListPage> {
               )
             ],
           )),*/
-      body: groupList(),//shownomassagetext? noGroupWidget():
+      body: groupList(), //shownomassagetext? noGroupWidget():
       /* floatingActionButton: FloatingActionButton(
         onPressed: () {
           popUpDialog(context);
@@ -314,11 +312,15 @@ class _GroupListPageState extends State<GroupListPage> {
 
   groupList() {
     //FirebaseFirestore.instance.collection("Users").doc(FirebaseAuth.instance.currentUser!.uid).snapshots()
-    try{
+    try {
+      var width = MediaQuery.of(context).size.width;
       return StreamBuilder(
-        stream: FirebaseFirestore.instance.collection("Users").doc(FirebaseAuth.instance.currentUser!.uid).snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection("Users")
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .snapshots(),
         builder: (context, AsyncSnapshot snapshot) {
-          try{
+          try {
             // print("sdfsdfsddewreww${snapshot.data["groups"]}");
             // make some checks
             if (snapshot.hasData) {
@@ -327,12 +329,20 @@ class _GroupListPageState extends State<GroupListPage> {
                   return ListView.builder(
                     itemCount: snapshot.data['groups'].length,
                     itemBuilder: (context, index) {
-                      int reverseIndex = snapshot.data['groups'].length - index - 1;
+                      int reverseIndex =
+                          snapshot.data['groups'].length - index - 1;
                       // return Text(getId(snapshot.data['groups'][reverseIndex]));}
-                      return GroupTile(
-                          groupId: getId(snapshot.data['groups'][reverseIndex]),
-                          groupName: getName(snapshot.data['groups'][reverseIndex]),
-                          userName: snapshot.data['id']);
+                      return Container(
+                        margin: EdgeInsets.symmetric(
+                            vertical: 0,
+                            horizontal: width < 800 ? 10 : width * 0.24),
+                        child: GroupTile(
+                            groupId:
+                                getId(snapshot.data['groups'][reverseIndex]),
+                            groupName:
+                                getName(snapshot.data['groups'][reverseIndex]),
+                            userName: snapshot.data['id']),
+                      );
                     },
                   );
                 } else {
@@ -347,16 +357,14 @@ class _GroupListPageState extends State<GroupListPage> {
                     color: Theme.of(context).primaryColor),
               );
             }
-          }catch(e) {
-              return noGroupWidget();
+          } catch (e) {
+            return noGroupWidget();
           }
-
         },
       );
-  }catch(e){
-      return const CircularProgressIndicator();
+    } catch (e) {
+      return const Center(child: CircularProgressIndicator());
     }
-
   }
 
   noGroupWidget() {

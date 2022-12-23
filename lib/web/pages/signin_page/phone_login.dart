@@ -31,7 +31,6 @@ class _LoginAppState extends State<LoginApp> {
       setState(() {
         width = MediaQuery.of(context).size.width * 5;
       });
-      
     }
     TextStyle defaultStyle =
         const TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 14.0);
@@ -53,8 +52,8 @@ class _LoginAppState extends State<LoginApp> {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                      Colors.black,
-                      Colors.green,
+                      Colors.purpleAccent,
+                      Colors.amber,
                       Colors.blue,
                     ])),
                 child: Column(
@@ -177,18 +176,18 @@ class _LoginAppState extends State<LoginApp> {
                             text: TextSpan(
                               style: defaultStyle,
                               children: <TextSpan>[
-                                const TextSpan(text: "Don't have an account?"),
+                                const TextSpan(text: ""),
                                 TextSpan(
-                                    text: 'Sign Up',
+                                    text: 'Need Help With Your Account?',
                                     style: linkStyle,
                                     recognizer: TapGestureRecognizer()
                                       ..onTap = () {
-                                        print("signup");
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    SignUpPage()));
+                                        // print("signup");
+                                        // Navigator.push(
+                                        //     context,
+                                        //     MaterialPageRoute(
+                                        //         builder: (context) =>
+                                        //             SignUpPage()));
                                       })
                               ],
                             ),

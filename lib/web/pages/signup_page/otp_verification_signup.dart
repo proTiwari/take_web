@@ -10,7 +10,6 @@ import 'package:take_web/web/Widgets/bottom_nav_bar.dart';
 import 'package:take_web/web/globar_variables/globals.dart';
 import 'package:take_web/web/pages/signup_page/phone_signup.dart';
 import 'package:take_web/web/pages/signin_page/sign_in.provider.dart';
-import 'package:take_web/web/pages/signup_page/signup_page.dart';
 
 import '../signup_page/signup_provider.dart';
 
@@ -115,10 +114,10 @@ class _OtpSignupPageState extends State<OtpSignupPage> {
                           height: 10,
                         ),
                         GestureDetector(
-                          onTap: () {
-                            provider.verify(_codeController.text, context,
-                                widget.verificationId);
-                          },
+                          // onTap: () {
+                          //   provider.verify(_codeController.text, context,
+                          //       widget.verificationId);
+                          // },
                           child: Container(
                             alignment: Alignment.center,
                             width: 262,
@@ -172,11 +171,11 @@ class _OtpSignupPageState extends State<OtpSignupPage> {
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () {
                                       print("signup");
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  SignUpPage()));
+                                      // Navigator.push(
+                                      //     context,
+                                      //     MaterialPageRoute(
+                                      //         builder: (context) =>
+                                      //             SignUpPage("")));
                                     })
                             ],
                           ),

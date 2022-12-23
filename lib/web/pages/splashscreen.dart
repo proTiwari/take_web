@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:take_web/web/globar_variables/globals.dart' as globals;
@@ -23,39 +24,43 @@ class _SplashScreenState extends State<SplashScreen> {
 
   void delay() async {
     // logic for getting user location and specially city
-
-    await getproperty("Along");
-    await getUser();
-
-    String? getStudentInformationEndpoint = "";
     try {
-      var prefs = await SharedPreferences.getInstance();
-      // SharedPreferences.setMockInitialValues({});
-      getStudentInformationEndpoint = prefs.getString('login');
-      print("getStudentInformation: ${getStudentInformationEndpoint}");
-      if (prefs.getString('login') != null) {
-        direction = true;
+      try {
+        if (FirebaseAuth.instance.currentUser!.uid != "") {
+          globals.logined = true;
+        }
+      } catch (e) {
+        globals.logined = false;
       }
-    } catch (e) {
-      print("error in splashscreen : $e");
-    }
+      await getproperty("Allahābād");
+      await getUser();
 
-    if (true) {
-      globals.city = "Along";
-      Future.delayed(const Duration(seconds: 0)).then(
-        (value) => {
-          if (globals.property.isNotEmpty)
-            {
-              Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                      builder: (BuildContext context) =>
-                          CustomBottomNavigation("Along")),
-                  ModalRoute.withName('/'))
-            }
-        },
-      );
+      // String? getStudentInformationEndpoint = "";
+      try {
+        // var prefs = await SharedPreferences.getInstance();
+        // SharedPreferences.setMockInitialValues({});
+        // getStudentInformationEndpoint = prefs.getString('login');
+        // if (prefs.getString('login') != null) {
+        //   direction = true;
+        // }
+      } catch (e) {
+        print("error in splashscreen : $e");
+      }
+
+      globals.city = "Allahābād";
+    } catch (e) {
+      print(e.toString());
     }
+    // ignore: use_build_context_synchronously
+    Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+            builder: (BuildContext context) =>
+                CustomBottomNavigation("Allahābād")),
+        ModalRoute.withName('/'));
+    // Future.delayed(const Duration(seconds: 0)).then(
+    //   (value) => {if (globals.property.isNotEmpty) {}},
+    // );
   }
 
   @override

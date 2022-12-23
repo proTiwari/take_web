@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "runforrent-c1224",
+    "staging": "runforrent-72f1d"
+  },
+  "targets": {},
+  "etags": {}
+}

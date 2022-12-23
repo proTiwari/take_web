@@ -148,7 +148,7 @@ class SignupProvider extends BaseProvider implements LoaderState {
     notifyListeners();
   }
 
-  Future<void> verify(code, BuildContext context, verifyid) async {
+  Future<void> verify(code, BuildContext context, verifyid, String name, String email, String phone) async {
     loading = true;
     notifyListeners();
     dynamic user;
@@ -163,22 +163,22 @@ class SignupProvider extends BaseProvider implements LoaderState {
         var uid = _auth.currentUser!.uid;
         // create user
         await FirebaseFirestore.instance.collection('Users').doc(uid).set({
-          "name": name.value.toString(),
-          "email": email.value.toString(),
-          "phone": phone.value.toString(),
+          "name": name,
+          "email": email,
+          "phone": phone,
           "groups": [],
           "id": uid
         });
         // var data = await SignupApi().signuprequest(name.value, email.value, phone.value, uid);
         // print(data);
         print("user 2");
-        await getproperty("Along");
+        await getproperty("Allahābād");
         await getUser();
         loading = false;
         notifyListeners();
         Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (BuildContext context) => CustomBottomNavigation("Along")),
+            MaterialPageRoute(builder: (BuildContext context) => CustomBottomNavigation("Allahābād")),
             ModalRoute.withName('/')
         );
       } else {
@@ -235,15 +235,6 @@ class SignupProvider extends BaseProvider implements LoaderState {
       verificationCompleted: (PhoneAuthCredential phoneAuthCredential) {},
     );
     return true;
-
-    //  var data = await SignupApi().signuprequest(Name, Email, Phone, Uid);
-
-    print("global token : ${globals.logintoken}");
-
-    print("uuuu");
-    loading = false;
-    notifyListeners();
-    return false;
   }
 
   @override

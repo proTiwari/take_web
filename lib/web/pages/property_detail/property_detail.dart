@@ -21,24 +21,33 @@ class Property extends StatefulWidget {
 
 class _PropertyState extends State<Property> {
   UserModel? valuedata;
+  var currentUser = '';
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     //getprofilepic();
+    try {
+      currentUser = FirebaseAuth.instance.currentUser!.uid;
+    } catch (e) {
+      currentUser = '';
+    }
     getownerdata(widget.detail["id"]);
   }
 
   var profileimage;
 
   getownerdata(id) async {
+    print("weweeeeeeeeeeeeee${id}");
+    try {
       valuedata = await FirebaseFirestore.instance
           .collection("Users")
           .doc(id)
           .get()
-          .then((value) {
-        valuedata = UserModel(
+          .then((value) async {
+        print("yyyyttttttttttttttttt${value.data()!["groups"]}");
+        valuedata = await UserModel(
             name: value.data()!["name"],
             email: value.data()!["email"],
             phone: value.data()!["phone"],
@@ -46,8 +55,7 @@ class _PropertyState extends State<Property> {
             groups: value.data()!["groups"],
             id: value.data()!["id"],
             properties: value.data()!["properties"],
-            address: value.data()!["address"]
-        );
+            address: value.data()!["address"]);
         profileimage = valuedata?.profileImage;
         setState(() {
           profileimage = valuedata?.profileImage;
@@ -57,7 +65,11 @@ class _PropertyState extends State<Property> {
         });
         print("valuedata ${valuedata?.address}");
       });
+    } catch (e) {
+      print("this is property detail error: ${e}");
+    }
   }
+
   void getprofilepic() async {
     try {
       await FirebaseFirestore.instance
@@ -78,32 +90,35 @@ class _PropertyState extends State<Property> {
 
   @override
   Widget build(BuildContext context) {
-    print(FirebaseAuth.instance.currentUser!.uid);
+    var width = MediaQuery.of(context).size.width;
     print(widget.detail["id"]);
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.white,
-        body: SingleChildScrollView(
-          child: Column(
-            children: [
-              ImageAnimation(widget.detail),
-              const SizedBox(
-                height: 15,
-              ),
-              OwnerProfileCard(
-                  widget.detail, profileimage, valuedata),
-              DetailCard(widget.detail),
-              ContactDetail(widget.detail),
-              GoogleMapCard()
-            ],
+        body: Container(
+          margin: EdgeInsets.symmetric(
+              vertical: 0, horizontal: width < 800 ? 10 : width * 0.24),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                ImageAnimation(widget.detail),
+                const SizedBox(
+                  height: 15,
+                ),
+                OwnerProfileCard(widget.detail, profileimage, valuedata),
+                DetailCard(widget.detail),
+                ContactDetail(widget.detail),
+                GoogleMapCard()
+              ],
+            ),
           ),
         ),
         bottomNavigationBar:
-            FirebaseAuth.instance.currentUser!.uid == widget.detail["id"]
-                ? SizedBox()
+            currentUser == widget.detail["id"]
+                ? const SizedBox()
                 : Padding(
                     padding: const EdgeInsets.all(6.0),
-                    child: DetailButton(widget.detail),
+                    child: DetailButton(widget.detail, currentUser),
                   ),
       ),
     );

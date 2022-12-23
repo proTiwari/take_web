@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:take_web/web/Widgets/cards.dart';
@@ -25,11 +26,12 @@ class _SearchState extends State<Search> {
     50: const Color(0xFFFFD7C2),
     100: Color(0xFFF27121),
   };
-  
-  
 
   Future<void> openFilterDialog() async {
     await FilterListDialog.display<User>(
+      width: MediaQuery.of(context).size.width < 800
+          ? 10
+          : MediaQuery.of(context).size.width * 0.24,
       context,
       hideSelectedTextCount: true,
       themeData: FilterListThemeData(context),
@@ -46,6 +48,7 @@ class _SearchState extends State<Search> {
       onApplyButtonClick: (list) {
         setState(() {
           selectedUserList = List.from(list!);
+          print("selectedList: ${selectedUserList!}");
         });
         Navigator.pop(context);
       },
@@ -85,8 +88,9 @@ class _SearchState extends State<Search> {
     listtoreturn.add(State);
     return listtoreturn;
   }
+
   var Citys = "Allahabad";
-  
+  bool propertyexist = true;
 
   @override
   void initState() {
@@ -138,7 +142,7 @@ class _SearchState extends State<Search> {
           margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
           decoration: BoxDecoration(
               border: Border.all(
-            color: isSelected! ? Color(0xFFF27121): Colors.grey[300]!,
+            color: isSelected! ? Color(0xFFF27121) : Colors.grey[300]!,
           )),
           child: Text(
             item.name,
@@ -152,103 +156,169 @@ class _SearchState extends State<Search> {
 
   @override
   Widget build(BuildContext context) {
+    setState(() {
+      propertyexist;
+    });
     print("globals.propertys ${globals.property}");
     var width = MediaQuery.of(context).size.width;
     globals.width = width * 0.87;
     var height = MediaQuery.of(context).size.height;
     globals.height = height;
     print(globals.property.length);
-    print(globals.property[0]);
+    // print(globals.property[0]);
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.white,
-          body: Center(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                const SizedBox(
-                  height: 10,
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 0, 27, 0),
-                  child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Align(
-                              alignment: AlignmentDirectional.center,
-                              child: InkWell(
-                                onTap: () {},
-                                child: FilterCard("Near me"),
-                              ),
+        body: Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              const SizedBox(
+                height: 10,
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 27, 0),
+                child: Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Align(
+                            alignment: AlignmentDirectional.center,
+                            child: InkWell(
+                              onTap: () {},
+                              child: FilterCard("Near me"),
                             ),
-                            const SizedBox(
-                              width: 10,
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Align(
+                            alignment: AlignmentDirectional.center,
+                            child: InkWell(
+                              onTap: () {
+                                setState(() {
+                                  CitySelector = !CitySelector;
+                                });
+                              },
+                              child: FilterCard(widget.city),
                             ),
-                            Align(
-                              alignment: AlignmentDirectional.center,
-                              child: InkWell(
-                                onTap: () {
-                                  setState(() {
-                                    CitySelector = !CitySelector;
-                                  });
-                                },
-                                child: FilterCard(widget.city),
-                              ),
+                          ),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Align(
+                            alignment: AlignmentDirectional.center,
+                            child: InkWell(
+                              onTap: openFilterDialog,
+                              child: FilterCard("Filter"),
                             ),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            Align(
-                              alignment: AlignmentDirectional.center,
-                              child: InkWell(
-                                onTap: openFilterDialog,
-                                child: FilterCard("Filter"),
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
-            ]
                   ),
-                ),
-
-                CitySelector
-                    ? AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 200),
-                        child: ParallelDropDownList(stateCity, widget.city),
-                      )
-                    : Container(),
-                !CitySelector
-                    ? SingleChildScrollView(
+                ]),
+              ),
+              CitySelector
+                  ? AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 0),
+                      child: ParallelDropDownList(stateCity, widget.city),
+                    )
+                  : Container(),
+              !CitySelector
+                  ? SingleChildScrollView(
                       child: Container(
-                        height: MediaQuery.of(context).size.height-154,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: ListView.builder(
-                            itemCount: globals.property.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              print("here ${index}");
-                              print(globals.userdata);
-                              return CardsWidget(globals.property[index]);
-                            },
-                          ),
+                      height: MediaQuery.of(context).size.height - 110,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: StreamBuilder(
+                          stream: FirebaseFirestore.instance
+                              .collection("State")
+                              .doc("City")
+                              .collection(widget.city)
+                              .snapshots(),
+                          builder:
+                              (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                            var documents = snapshot.data!.docs;
+                            //todo Documents list added to filterTitle
+                            var finalList = [];
+                            if (selectedUserList!.isNotEmpty) {
+                              var list;
+                              for (var i in selectedUserList!) {
+                                list = documents.where((element) {
+                                  return element
+                                      .get("wantto")
+                                      .toString()
+                                      .toLowerCase()
+                                      .contains(
+                                          i.avatar.toString().toLowerCase());
+                                }).toList();
+                                finalList = List.from(finalList)..addAll(list);
+                                list = documents.where((element) {
+                                  return element
+                                      .get("servicetype")
+                                      .toString()
+                                      .toLowerCase()
+                                      .contains(
+                                          i.avatar.toString().toLowerCase());
+                                }).toList();
+                                finalList = List.from(finalList)..addAll(list);
+                              }
+                              print("documents: ${documents}");
+                            }
+                            print("sdijj${snapshot.hasData}");
+                            try {
+                              snapshot.data!.docs.first["pincode"];
+                            } catch (e) {
+                              return const Padding(
+                                padding: EdgeInsets.fromLTRB(0, 40, 0, 0),
+                                child: Center(
+                                    child: Text(
+                                        "There is no property upload from this city!")),
+                              );
+                            }
+                            // ignore: unnecessary_new
+                            if (selectedUserList!.isNotEmpty) {
+                              return ListView(
+                                  children: getExpenseItemsdocs(finalList));
+                            } else {
+                              print(snapshot);
+                              return ListView(
+                                  children: getExpenseItems(snapshot));
+                            }
+                          },
                         ),
                       ),
-                    )
-                    : Container(),
-              ],
-            ),
+                    ))
+                  : Container(),
+            ],
           ),
-          floatingActionButton: const GoogleMapCircle()),
+        ),
+        floatingActionButton: Container(
+          margin: EdgeInsets.symmetric(
+              vertical: 0, horizontal: width < 800 ? 10 : width * 0.24),
+          child: const GoogleMapCircle(),
+        ),
+      ),
     );
+  }
+
+  getExpenseItems(AsyncSnapshot<QuerySnapshot> snapshot) {
+    print("type of doc from snapshot");
+    print(snapshot.data!.docs.first.runtimeType);
+    return snapshot.data!.docs.map((doc) => CardsWidget(doc)).toList();
+  }
+
+  getExpenseItemsdocs(docs) {
+    try {
+      print("type of doc from Docs");
+      return docs.map<Widget>((doc) => CardsWidget(doc)).toList();
+    } catch (e) {
+      print("thisis the error--${e}");
+    }
   }
 }
 
@@ -259,22 +329,22 @@ class User {
 }
 
 List<User> userList = [
-  User(name: "less than 5000/month", avatar: "user.png"),
-  User(name: "less than 10,000/month", avatar: "user.png"),
-  User(name: "more than 10,000/month", avatar: "user.png"),
-  User(name: "Within 10km", avatar: "user.png"),
-  User(name: "Within 5km", avatar: "user.png"),
-  User(name: "Within 1km", avatar: "user.png"),
-  User(name: "House On Sale", avatar: "user.png"),
-  User(name: "House/Room On Rent", avatar: "user.png"),
-  User(name: "Hotel Service", avatar: "user.png"),
-  User(name: "PG Service", avatar: "user.png"),
-  User(name: "Hostel Service", avatar: "user.png"),
-  User(name: "Home Service", avatar: "user.png"),
-  User(name: "No Sharing", avatar: "user.png"),
-  User(name: "Two Sharing", avatar: "user.png"),
-  User(name: "Three Sharing", avatar: "user.png"),
-  User(name: "Many Sharing", avatar: "user.png"),
+  // User(name: "less than 5000/month", avatar: "user.png"),
+  // User(name: "less than 10,000/month", avatar: "user.png"),
+  // User(name: "more than 10,000/month", avatar: "user.png"),
+  // User(name: "Within 10km", avatar: "user.png"),
+  // User(name: "Within 5km", avatar: "user.png"),
+  // User(name: "Within 1km", avatar: "user.png"),
+  User(name: "Property On Sale", avatar: "Sell property"), //
+  User(name: "Property On Rent", avatar: "Rent property"), //
+  User(name: "Hotel Service", avatar: "Hotel"), //
+  User(name: "PG Service", avatar: "PG"), //
+  User(name: "Hostel Service", avatar: "Hostel"), //
+  User(name: "Home Service", avatar: "Home"), //
+  // User(name: "No Sharing", avatar: "user.png"),
+  // User(name: "Two Sharing", avatar: "user.png"),
+  // User(name: "Three Sharing", avatar: "user.png"),
+  // User(name: "Many Sharing", avatar: "user.png"),
 ];
 
 class Location {

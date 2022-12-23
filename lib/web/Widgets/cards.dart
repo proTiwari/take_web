@@ -15,6 +15,7 @@ class _CardsWidgetState extends State<CardsWidget> {
   var property = '';
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
     if (widget.property['wantto'] == 'Rent property') {
       setState(() {
         property = 'Property on sale';
@@ -26,7 +27,9 @@ class _CardsWidgetState extends State<CardsWidget> {
     }
 
     return Container(
-      margin: EdgeInsets.all(8.0),
+      margin: EdgeInsets.symmetric(
+          vertical: 0, horizontal: width < 800 ? 10 : width * 0.24),
+      // margin: EdgeInsets.all(8.0),
       decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(
@@ -49,7 +52,7 @@ class _CardsWidgetState extends State<CardsWidget> {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => Property(detail:widget.property)));
+                    builder: (context) => Property(detail: widget.property)));
           },
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -62,9 +65,8 @@ class _CardsWidgetState extends State<CardsWidget> {
                     bottomRight: Radius.circular(0)),
                 child: Image.network(
                   widget.property['propertyimage'][0],
-                  // width: 300,
                   height: globals.height * 0.39,
-                  fit: BoxFit.cover,
+                  fit: width < 800 ? BoxFit.cover : BoxFit.contain,
                 ),
               ),
               Padding(
@@ -75,19 +77,22 @@ class _CardsWidgetState extends State<CardsWidget> {
                     SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
                       child: Padding(
-                        padding: EdgeInsets.fromLTRB(0, 2.0, 2.0, 2.0),
+                        padding: const EdgeInsets.fromLTRB(0, 2.0, 2.0, 2.0),
                         child: Row(
                           children: [
                             SizedBox(
-                              height: 31,
+                              height: 37,
                               child: SmallCard(
                                   "${widget.property['city']}"), //widget.property['city']
                             ),
                             SizedBox(
                               height: 31,
-                              child: widget.property['wantto'] == 'Rent property'?SmallCard(
-                                  "₹${widget.property['amount']}/${widget.property['paymentduration']}"):SmallCard(
-                                  "₹${widget.property['amount']}/-"), //widget.property['streetaddress']
+                              child: widget.property['wantto'] ==
+                                      'Rent property'
+                                  ? SmallCard(
+                                      "₹${widget.property['amount']}/${widget.property['paymentduration']}")
+                                  : SmallCard(
+                                      "₹${widget.property['amount']}/-"), //widget.property['streetaddress']
                             ),
                             SizedBox(
                               height: 31,
@@ -106,11 +111,8 @@ class _CardsWidgetState extends State<CardsWidget> {
                           children: [
                             SizedBox(
                               height: 31,
-                              child: Expanded(
-                                flex: 3,
-                                child: SmallCard(
-                                    "${widget.property['streetaddress']} ppppppppppppppppppppppppppppppppppppppppppppppp"),
-                              ), //
+                              child: SmallCard(
+                                  "${widget.property['streetaddress']}"), //
                             ),
                           ],
                         ),

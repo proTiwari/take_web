@@ -1,7 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:take_web/web/pages/signin_page/otp_verification_login.dart';
+import 'package:take_web/web/pages/signup_page/phone_signup.dart';
 import 'package:take_web/web/providers/base_providers.dart';
 import '../../Widgets/bottom_nav_bar.dart';
 import '../../firebase_functions/firebase_fun.dart';
@@ -28,8 +30,6 @@ class ValidatorType {
 }
 
 class SigninProvider extends BaseProvider implements LoaderState {
-
-
   bool loading = false;
   var phoneauth = 'user does not exist';
 
@@ -45,8 +45,6 @@ class SigninProvider extends BaseProvider implements LoaderState {
       return false;
     }
   }
-
-
 
   //Setters
   void changeEmail(String value) {
@@ -72,10 +70,10 @@ class SigninProvider extends BaseProvider implements LoaderState {
     notifyListeners();
   }
 
-  Future<void> verify(code,BuildContext context, verifyid) async {
+  Future<void> verify(code, BuildContext context, verifyid) async {
     loading = true;
     notifyListeners();
-    try{
+    try {
       print("uiop1");
       AuthCredential credential = await PhoneAuthProvider.credential(
           verificationId: verifyid, smsCode: code);
@@ -87,19 +85,20 @@ class SigninProvider extends BaseProvider implements LoaderState {
       print(result.user);
       print(uid);
 
-      if(FirebaseAuth.instance.currentUser != null){
+      if (FirebaseAuth.instance.currentUser != null) {
         print("uiop5 ${FirebaseAuth.instance.currentUser}");
 
         print("user 2");
-        await getproperty("Along");
+        await getproperty("Allahābād");
         await getUser();
         loading = false;
         notifyListeners();
         Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (BuildContext context) => CustomBottomNavigation("Along")),
-            ModalRoute.withName('/')
-        );
+            MaterialPageRoute(
+                builder: (BuildContext context) =>
+                    CustomBottomNavigation("Allahābād")),
+            ModalRoute.withName('/'));
       } else {
 /*        print("Error");
         showToast(context: context,"something went wrong");
@@ -107,9 +106,9 @@ class SigninProvider extends BaseProvider implements LoaderState {
         notifyListeners();*/
 
       }
-    }catch(e){
+    } catch (e) {
       print("dfdfg");
-      showToast(context: context,e.toString());
+      showToast(context: context, e.toString());
       loading = false;
       notifyListeners();
     }
@@ -120,35 +119,56 @@ class SigninProvider extends BaseProvider implements LoaderState {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Future<bool> loginUser(String phone, BuildContext context) async {
-
     loading = true;
     notifyListeners();
     print(loading);
-    try{
-        _auth.verifyPhoneNumber(
-          phoneNumber: "+91${phone}",
-          timeout: const Duration(seconds: 60),
-          verificationCompleted: (AuthCredential credential) async {
-          },
-          verificationFailed: (dynamic exception) {
-            loading = false;
-            notifyListeners();
-            showToast(context: context, exception.toString());
-            print(exception);
-          },
-          codeSent: (String verificationId, int? forceResendingToken) {
-            loading = false;
-            notifyListeners();
+    try {
+      _auth.verifyPhoneNumber(
+        phoneNumber: "+91${phone}",
+        timeout: const Duration(seconds: 60),
+        verificationCompleted: (AuthCredential credential) async {},
+        verificationFailed: (dynamic exception) {
+          loading = false;
+          notifyListeners();
+          showToast(context: context, exception.toString());
+          print(exception);
+        },
+        codeSent: (String verificationId, int? forceResendingToken) async {
+          var ifexists = await FirebaseFirestore.instance
+              .collection("Users")
+              .where("phone", isEqualTo: "+91${phone}")
+              .get();
+          try {
+            final userSnapshot = ifexists.docs.first;
+            print("usersnapshot: ${userSnapshot}");
             Navigator.push(
-                context, MaterialPageRoute(
-                builder: (context) => OtpLoginPage(verificationId)));
-          },
-          // ignore: avoid_returning_null_for_void
-          codeAutoRetrievalTimeout: (verificationId) => null,
-        );
+                context,
+                MaterialPageRoute(
+                    builder: (context) => OtpLoginPage(verificationId)));
+          } catch (e) {
+            print("--exists--${e}");
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => SignUpPage(verificationId, "+91${phone}"),
+              ),
+            );
+          }
+          loading = false;
+          notifyListeners();
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(
+          //     builder: (context) => OtpLoginPage(verificationId),
+          //   ),
+          // );
+        },
+        // ignore: avoid_returning_null_for_void
+        codeAutoRetrievalTimeout: (verificationId) => null,
+      );
       return false;
-    }catch(e){
-      showToast(context:context, e.toString());
+    } catch (e) {
+      showToast(context: context, e.toString());
       print("uuuu");
       loading = false;
       notifyListeners();

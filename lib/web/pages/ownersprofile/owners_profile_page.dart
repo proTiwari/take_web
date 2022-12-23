@@ -36,14 +36,14 @@ class _OwnersProfilePageState extends State<OwnersProfilePage>
     super.initState();
     tabController = TabController(length: 2, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      data =
-          Provider.of<FirebaseServices>(context, listen: false).getOwnerProperties(globals.ownerprofiledata.properties);
+      data = Provider.of<FirebaseServices>(context, listen: false)
+          .getOwnerProperties(globals.ownerprofiledata.properties);
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
+    var width = MediaQuery.of(context).size.width;
     try {
       globals.ownerprofiledata.address;
     } catch (e) {
@@ -65,8 +65,9 @@ class _OwnersProfilePageState extends State<OwnersProfilePage>
           Consumer<FirebaseServices>(builder: (context, provider, child) {
         // provider.getProperties();
         return SingleChildScrollView(
-          child: SizedBox(
-            height: MediaQuery.of(context).size.height * 0.959,
+          child: Container(
+            margin: EdgeInsets.symmetric(
+                vertical: 0, horizontal: width < 800 ? 10 : width * 0.24),
             child: Column(
               children: [
                 const SizedBox(height: 10.0),
@@ -151,59 +152,65 @@ class _OwnersProfilePageState extends State<OwnersProfilePage>
                 SingleChildScrollView(
                   child: SizedBox(
                     height: MediaQuery.of(context).size.height * 0.67,
-                    child: Expanded(
-                      child: TabBarView(
-                        controller: tabController,
-                        children: [
-                          provider.owerpropertydata.isNotEmpty
-                              ? GridView.builder(
-                                  itemCount: provider.owerpropertydata.length,
-                                  gridDelegate:
-                                      const SliverGridDelegateWithFixedCrossAxisCount(
-                                          mainAxisExtent: 200.0,
-                                          crossAxisCount: 3),
-                                  itemBuilder: (context, index) {
-                                    return Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color: Colors.black,
-                                          borderRadius:
-                                              BorderRadius.circular(20.0),
-                                          image: DecorationImage(
-                                            image: NetworkImage(provider
-                                                .owerpropertydata[index]
-                                                .propertyimage[0]), //globals
-                                            //   .listofproperties[index]
-                                            // .propertyimage[0]
-
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(
-                                              left: 37.0,
-                                              right: 37.0,
-                                              top: 185.0,
-                                              bottom: 15.0),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: TabBarView(
+                            controller: tabController,
+                            children: [
+                              provider.owerpropertydata.isNotEmpty
+                                  ? GridView.builder(
+                                      itemCount:
+                                          provider.owerpropertydata.length,
+                                      gridDelegate:
+                                          const SliverGridDelegateWithFixedCrossAxisCount(
+                                              mainAxisExtent: 200.0,
+                                              crossAxisCount: 3),
+                                      itemBuilder: (context, index) {
+                                        return Padding(
+                                          padding: const EdgeInsets.all(8.0),
                                           child: Container(
-                                            alignment: Alignment.center,
                                             decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                        15.0)),
-                                            child: const Text(""),
+                                              color: Colors.black,
+                                              borderRadius:
+                                                  BorderRadius.circular(20.0),
+                                              image: DecorationImage(
+                                                image: NetworkImage(provider
+                                                        .owerpropertydata[index]
+                                                        .propertyimage[
+                                                    0]), //globals
+                                                //   .listofproperties[index]
+                                                // .propertyimage[0]
+
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(
+                                                  left: 37.0,
+                                                  right: 37.0,
+                                                  top: 185.0,
+                                                  bottom: 15.0),
+                                              child: Container(
+                                                alignment: Alignment.center,
+                                                decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            15.0)),
+                                                child: const Text(""),
+                                              ),
+                                            ),
                                           ),
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                )
-                              : noGroupWidget(),
-                          GoogleMapCard(),
-                        ],
-                      ),
+                                        );
+                                      },
+                                    )
+                                  : noGroupWidget(),
+                              GoogleMapCard(),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 )
@@ -219,7 +226,7 @@ class _OwnersProfilePageState extends State<OwnersProfilePage>
     dynamic image = const NetworkImage(
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQd9gwkP14yXTwV2JMOryOh3Q4tS1UHmBqkcPGNfawYLr8UwHwrRsv_t50q5X5OMsqP5Ag&usqp=CAU");
     try {
-     image = NetworkImage(globals.ownerprofiledata.profileImage);
+      image = NetworkImage(globals.ownerprofiledata.profileImage);
     } catch (e) {
       image = const NetworkImage(
           "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQd9gwkP14yXTwV2JMOryOh3Q4tS1UHmBqkcPGNfawYLr8UwHwrRsv_t50q5X5OMsqP5Ag&usqp=CAU");
