@@ -11,10 +11,19 @@ class CardsWidget extends StatefulWidget {
   State<CardsWidget> createState() => _CardsWidgetState();
 }
 
+
 class _CardsWidgetState extends State<CardsWidget> {
   var property = '';
+
+  var firstpropertyimage;
   @override
   Widget build(BuildContext context) {
+    try{
+      firstpropertyimage = widget.property['propertyimage'][0];
+    }catch(e){
+      firstpropertyimage = 'https://icons.iconarchive.com/icons/paomedia/small-n-flat/256/house-icon.png';
+    }
+    
     final width = MediaQuery.of(context).size.width;
     if (widget.property['wantto'] == 'Rent property') {
       setState(() {
@@ -64,7 +73,7 @@ class _CardsWidgetState extends State<CardsWidget> {
                     bottomLeft: Radius.circular(0),
                     bottomRight: Radius.circular(0)),
                 child: Image.network(
-                  widget.property['propertyimage'][0],
+                  firstpropertyimage,
                   height: globals.height * 0.39,
                   fit: width < 800 ? BoxFit.cover : BoxFit.contain,
                 ),

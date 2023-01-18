@@ -31,6 +31,7 @@ class ListingModel {
 
 class ListProvider extends BaseProvider {
   List imagelistvalue = [];
+  List uploadimagelist = [];
 
   bool verify = true;
 
@@ -48,7 +49,7 @@ class ListProvider extends BaseProvider {
 
   var wanttotext = "";
   var wantTo = [
-    'Want you want to sell property or rent it?',
+    'Want to sell property or rent it?',
     'Sell property',
     'Rent property',
   ];
@@ -179,7 +180,16 @@ class ListProvider extends BaseProvider {
   }
 
   void changeimagelist() {
+    if (globals.initlistimages.isNotEmpty) {
+      imagelistvalue = globals.initlistimages;
+      notifyListeners();
+    }
     imagelistvalue;
+    notifyListeners();
+  }//uploadimagelist
+
+  void uploadingimagelist() {
+    uploadimagelist;
     notifyListeners();
   }
 
@@ -825,7 +835,7 @@ class ListProvider extends BaseProvider {
         notifyListeners();
         // notifyListeners();
         showToast(
-          "select 'Want you want to sell property or rent it?' field!",
+          "select 'Want to sell property or rent it?' field!",
           context: context,
           animation: StyledToastAnimation.none,
         );
@@ -997,10 +1007,9 @@ class ListProvider extends BaseProvider {
       // await getUser();
       showToast("successfully uploaded", context: context);
       Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-            builder: (BuildContext context) => SplashScreen()),
-        ModalRoute.withName('/'));
+          context,
+          MaterialPageRoute(builder: (BuildContext context) => SplashScreen()),
+          ModalRoute.withName('/'));
     } catch (e) {
       loading = false;
       notifyListeners();

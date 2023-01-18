@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:take_web/web/models/user_model.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker_web/image_picker_web.dart';
@@ -23,11 +24,14 @@ import 'package:take_web/web/pages/edit_profile/edit_profile_page.dart';
 import 'package:take_web/web/pages/signin_page/phone_login.dart';
 import 'package:take_web/web/pages/splashscreen.dart';
 import 'package:take_web/web/providers/base_providers.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../firebase_functions/firebase_fun.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path/path.dart' as base;
 
 import 'package:file_picker/file_picker.dart';
+
+import '../../models/property_model.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -51,8 +55,10 @@ class _ProfilePageState extends State<ProfilePage>
   TabController? tabController;
   int selectedIndex = 0;
   bool saveloading = false;
+  UserModel? usermodel;
   bool loading = false;
   bool isEdit = false;
+  ValueNotifier? valuepropertydata;
   var circularProgress = 0.0;
   bool emptyproperty = true;
   bool addressnotexist = false;
@@ -63,11 +69,13 @@ class _ProfilePageState extends State<ProfilePage>
     // TODO: implement initState
     super.initState();
     addData();
+    usermodel = Provider.of<UserModel?>(context, listen: false);
     try {
       tabController = TabController(length: 2, vsync: this);
       // print(globals.userdata['name']);
       name.text = userProvider.getUser.name!;
       emailfield.text = userProvider.getUser.email!;
+
       try {
         WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
           setState(() {
@@ -99,6 +107,10 @@ class _ProfilePageState extends State<ProfilePage>
   addData() async {
     userProvider = Provider.of<BaseProvider>(context, listen: false);
     await userProvider.refreshUser();
+  }
+
+  void valuedatafun() async {
+    valuepropertydata = await FirebaseServices().valuepropertydata;
   }
 
   var imagedata;
@@ -209,6 +221,10 @@ class _ProfilePageState extends State<ProfilePage>
         const TextStyle(color: Color.fromARGB(255, 9, 114, 199));
     final color = Theme.of(context).colorScheme.primary;
     var width = MediaQuery.of(context).size.width;
+    Stream<DocumentSnapshot> courseDocStream = FirebaseFirestore.instance
+        .collection('Users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .snapshots();
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -217,6 +233,27 @@ class _ProfilePageState extends State<ProfilePage>
         flexibleSpace: const FlexibleSpaceBar(),
         elevation: 0,
         actions: [
+          IconButton(
+            onPressed: () async {
+              final Uri params = Uri(
+                  scheme: 'mailto',
+                  path: 'team@runforrent.com',
+                  query: 'subject=Query about App');
+              var mailurl = params.toString();
+              if (await canLaunch(mailurl)) {
+                await launch(mailurl);
+              } else {
+                throw 'Could not launch $mailurl';
+              }
+            },
+            icon: const Icon(
+              Icons.help,
+              color: Colors.black,
+            ),
+          ),
+          SizedBox(
+            width: width < 800 ? width * 0.78 : width * 0.90,
+          ),
           IconButton(
             onPressed: () {
               showDialog<String>(
@@ -353,66 +390,234 @@ class _ProfilePageState extends State<ProfilePage>
                             return TabBarView(
                               controller: tabController,
                               children: [
-                                provider.valuedata.isNotEmpty
-                                    ? GridView.builder(
-                                        itemCount: provider.valuedata.length,
-                                        gridDelegate:
-                                            const SliverGridDelegateWithFixedCrossAxisCount(
-                                                mainAxisExtent: 200.0,
-                                                crossAxisCount: 3),
-                                        itemBuilder: (context, index) {
-                                          return Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: GestureDetector(
-                                              onTap: (() {
-                                                Navigator.push(
+                                StreamBuilder<DocumentSnapshot>(
+                                    stream: courseDocStream,
+                                    builder: (context,
+                                        AsyncSnapshot<DocumentSnapshot>
+                                            snapshot) {
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.active) {
+                                        // get course document
+                                        var courseDocument =
+                                            snapshot.data!.data() as Map;
+
+                                        globals.userdata = courseDocument;
+                                        return GridView.builder(
+                                          itemCount:
+                                              courseDocument['properties']
+                                                  .length,
+                                          gridDelegate:
+                                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                                  mainAxisExtent: 200.0,
+                                                  crossAxisCount: 3),
+                                          itemBuilder: (context, index) {
+                                            try {
+                                              print("ffff");
+                                              var data = globals
+                                                  .userdata['properties'];
+                                              print("jjjj$data");
+
+                                              for (var i in data) {
+                                                List dd = i.split("/");
+                                                print(
+                                                    "this is first value in the list: ${dd[0]}");
+                                                print(dd[1]);
+                                                // PropertyModel? propertyModel;
+                                                PropertyModel propertyModel;
+                                                FirebaseFirestore.instance
+                                                    .collection("State")
+                                                    .doc("City")
+                                                    .collection(dd[0])
+                                                    .doc(dd[1])
+                                                    .get()
+                                                    .then((value) => {
+                                                          propertyModel =
+                                                              PropertyModel(
+                                                            city: value
+                                                                .get("city"),
+                                                            state: value
+                                                                .get("state"),
+                                                            propertyId: value.get(
+                                                                "propertyId"),
+                                                            propertyimage:
+                                                                value.get(
+                                                                    "propertyimage"),
+                                                            pincode: value
+                                                                .get("pincode"),
+                                                            streetaddress:
+                                                                value.get(
+                                                                    "streetaddress"),
+                                                            wantto: value
+                                                                .get("wantto"),
+                                                            advancemoney: value.get(
+                                                                "advancemoney"),
+                                                            numberofrooms:
+                                                                value.get(
+                                                                    "numberofrooms"),
+                                                            amount: value
+                                                                .get("amount"),
+                                                            propertyname: value.get(
+                                                                "propertyname"),
+                                                            areaofland: value.get(
+                                                                "areaofland"),
+                                                            numberoffloors:
+                                                                value.get(
+                                                                    "numberoffloors"),
+                                                            ownername: value.get(
+                                                                "ownername"),
+                                                            mobilenumber: value.get(
+                                                                "mobilenumber"),
+                                                            whatsappnumber:
+                                                                value.get(
+                                                                    "whatsappnumber"),
+                                                            email: value
+                                                                .get("email"),
+                                                            description: value.get(
+                                                                "description"),
+                                                            servicetype: value.get(
+                                                                "servicetype"),
+                                                            sharing: value
+                                                                .get('sharing'),
+                                                            foodservice: value.get(
+                                                                "foodservice"),
+                                                            paymentduration:
+                                                                value.get(
+                                                                    "paymentduration"),
+                                                          ),
+                                                        })
+                                                    .whenComplete(() => {})
+                                                    .catchError((error) {
+                                                  print(error);
+                                                }); // valuedata.add(propertyModel)
+                                              }
+                                            } catch (e) {
+                                              print(
+                                                  "here is the error: ${e.toString()}");
+                                            }
+
+                                            return Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: GestureDetector(
+                                                onTap: (() {
+                                                  Navigator.push(
                                                     context,
                                                     MaterialPageRoute(
-                                                        builder: (BuildContext
-                                                                context) =>
-                                                            EditProfilePage(provider.valuedata[index])));
-                                              }),
-                                              child: Container(
-                                                decoration: BoxDecoration(
-                                                  color: Colors.black,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          20.0),
-                                                  image: DecorationImage(
-                                                    image: NetworkImage(provider
-                                                            .valuedata[index]
-                                                            .propertyimage[
-                                                        0]), //globals
-                                                    //   .listofproperties[index]
-                                                    // .propertyimage[0]
+                                                      builder: (BuildContext
+                                                              context) =>
+                                                          EditProfilePage(
+                                                              provider.valuedata[
+                                                                  index]),
+                                                    ),
+                                                  );
+                                                }),
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.black,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20.0),
+                                                    image: DecorationImage(
+                                                      image: NetworkImage(provider
+                                                              .valuedata[index]
+                                                              .propertyimage[
+                                                          0]), //globals
+                                                      //   .listofproperties[index]
+                                                      // .propertyimage[0]
 
-                                                    fit: BoxFit.cover,
+                                                      fit: BoxFit.cover,
+                                                    ),
                                                   ),
-                                                ),
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                          left: 37.0,
-                                                          right: 37.0,
-                                                          top: 185.0,
-                                                          bottom: 15.0),
-                                                  child: Container(
-                                                    alignment: Alignment.center,
-                                                    decoration: BoxDecoration(
-                                                        color: Colors.white,
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(
-                                                                    15.0)),
-                                                    child: const Text(""),
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            left: 37.0,
+                                                            right: 37.0,
+                                                            top: 185.0,
+                                                            bottom: 15.0),
+                                                    child: Container(
+                                                      alignment:
+                                                          Alignment.center,
+                                                      decoration: BoxDecoration(
+                                                          color: Colors.white,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      15.0)),
+                                                      child: const Text(""),
+                                                    ),
                                                   ),
                                                 ),
                                               ),
-                                            ),
-                                          );
-                                        },
-                                      )
-                                    : noGroupWidget(),
+                                            );
+                                          },
+                                        );
+                                      } else {
+                                        return Text("data");
+                                      }
+                                      // get sections from the document
+                                    }),
+                                // provider.valuedata.isNotEmpty
+                                // ? GridView.builder(
+                                //     itemCount: provider.valuedata.length,
+                                //     gridDelegate:
+                                //         const SliverGridDelegateWithFixedCrossAxisCount(
+                                //             mainAxisExtent: 200.0,
+                                //             crossAxisCount: 3),
+                                //     itemBuilder: (context, index) {
+                                //       return Padding(
+                                //         padding: const EdgeInsets.all(8.0),
+                                //         child: GestureDetector(
+                                //           onTap: (() {
+                                //             Navigator.push(
+                                //                 context,
+                                //                 MaterialPageRoute(
+                                //                     builder: (BuildContext
+                                //                             context) =>
+                                //                         EditProfilePage(
+                                //                            provider.valuedata[index])));
+                                //           }),
+                                //           child: Container(
+                                //             decoration: BoxDecoration(
+                                //               color: Colors.black,
+                                //               borderRadius:
+                                //                   BorderRadius.circular(
+                                //                       20.0),
+                                //               image: DecorationImage(
+                                //                 image: NetworkImage(provider
+                                //                         .valuedata[index]
+                                //                         .propertyimage[
+                                //                     0]), //globals
+                                //                 //   .listofproperties[index]
+                                //                 // .propertyimage[0]
+
+                                //                 fit: BoxFit.cover,
+                                //               ),
+                                //             ),
+                                //             child: Padding(
+                                //               padding:
+                                //                   const EdgeInsets.only(
+                                //                       left: 37.0,
+                                //                       right: 37.0,
+                                //                       top: 185.0,
+                                //                       bottom: 15.0),
+                                //               child: Container(
+                                //                 alignment: Alignment.center,
+                                //                 decoration: BoxDecoration(
+                                //                     color: Colors.white,
+                                //                     borderRadius:
+                                //                         BorderRadius
+                                //                             .circular(
+                                //                                 15.0)),
+                                //                 child: const Text(""),
+                                //               ),
+                                //             ),
+                                //           ),
+                                //         ),
+                                //       );
+                                //     },
+                                //   )
+                                // : noGroupWidget(),
                                 Center(
                                   child: Form(
                                     key: _formKey,

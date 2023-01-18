@@ -14,7 +14,7 @@ class OtpLoginPage extends StatefulWidget {
 }
 
 class _OtpLoginPageState extends State<OtpLoginPage> {
-  final _codeController = TextEditingController();
+  static final _codeController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -47,8 +47,8 @@ class _OtpLoginPageState extends State<OtpLoginPage> {
                     height: 25,
                   ),
                   SizedBox(
-                    height: 180,
-                    width: 450,
+                    height: 80,
+                    width: 350,
                     child: Container(),
                   ),
                   const SizedBox(
@@ -105,8 +105,9 @@ class _OtpLoginPageState extends State<OtpLoginPage> {
                         ),
                         GestureDetector(
                           onTap: () {
-                            provider.verify(
-                                _codeController.text, context, widget.verificationId);
+                            FocusScope.of(context).unfocus();
+                            provider.verify(_codeController.text, context,
+                                widget.verificationId);
                           },
                           child: Container(
                             alignment: Alignment.center,

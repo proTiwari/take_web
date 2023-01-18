@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:take_web/web/globar_variables/globals.dart' as globals;
 import '../../Widgets/google_map_card.dart';
 import '../../firebase_functions/firebase_fun.dart';
+import 'owners_profile_property_detail.dart';
 
 class OwnersProfilePage extends StatefulWidget {
   var valuedata;
@@ -167,38 +170,55 @@ class _OwnersProfilePageState extends State<OwnersProfilePage>
                                               mainAxisExtent: 200.0,
                                               crossAxisCount: 3),
                                       itemBuilder: (context, index) {
+                                        var detai = jsonEncode(
+                                            provider.owerpropertydata[index]);
+                                        print("uiuiiiuiuiuiu${detai}");
+                                        var detail = jsonDecode(detai);
                                         return Padding(
                                           padding: const EdgeInsets.all(8.0),
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                              color: Colors.black,
-                                              borderRadius:
-                                                  BorderRadius.circular(20.0),
-                                              image: DecorationImage(
-                                                image: NetworkImage(provider
-                                                        .owerpropertydata[index]
-                                                        .propertyimage[
-                                                    0]), //globals
-                                                //   .listofproperties[index]
-                                                // .propertyimage[0]
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (BuildContext
+                                                              context) =>
+                                                          OwnersProfileProperty(
+                                                              detail: detail)));
+                                            },
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                color: Colors.black,
+                                                borderRadius:
+                                                    BorderRadius.circular(20.0),
+                                                image: DecorationImage(
+                                                  image: NetworkImage(
+                                                      provider
+                                                              .owerpropertydata[
+                                                                  index]
+                                                              .propertyimage[
+                                                          0]), //globals
+                                                  //   .listofproperties[index]
+                                                  // .propertyimage[0]
 
-                                                fit: BoxFit.cover,
+                                                  fit: BoxFit.cover,
+                                                ),
                                               ),
-                                            ),
-                                            child: Padding(
-                                              padding: const EdgeInsets.only(
-                                                  left: 37.0,
-                                                  right: 37.0,
-                                                  top: 185.0,
-                                                  bottom: 15.0),
-                                              child: Container(
-                                                alignment: Alignment.center,
-                                                decoration: BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            15.0)),
-                                                child: const Text(""),
+                                              child: Padding(
+                                                padding: const EdgeInsets.only(
+                                                    left: 37.0,
+                                                    right: 37.0,
+                                                    top: 185.0,
+                                                    bottom: 15.0),
+                                                child: Container(
+                                                  alignment: Alignment.center,
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.white,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              15.0)),
+                                                  child: const Text(""),
+                                                ),
                                               ),
                                             ),
                                           ),

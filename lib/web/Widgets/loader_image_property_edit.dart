@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
@@ -12,7 +13,9 @@ class LoadedImagePropertyEdit extends StatefulWidget {
   dynamic e;
   var city;
   var propertyId;
-  LoadedImagePropertyEdit(this.e, this.city, this.propertyId, {Key? key})
+  BuildContext context;
+  LoadedImagePropertyEdit(this.e, this.city, this.propertyId, this.context,
+      {Key? key})
       : super(key: key);
 
   @override
@@ -32,11 +35,11 @@ class _LoadedImagePropertyEditState extends State<LoadedImagePropertyEdit> {
       ),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            widget.e == null
-                ? Container()
-                : Stack(
+        child: Column(children: [
+          widget.e == null
+              ? Container()
+              : Consumer<ListProvider>(builder: (context, provider, child) {
+                  return Stack(
                     children: [
                       CircleAvatar(
                         backgroundColor: Colors.white,
@@ -60,44 +63,97 @@ class _LoadedImagePropertyEditState extends State<LoadedImagePropertyEdit> {
                         child: IconButton(
                           icon: const Icon(Icons.delete),
                           onPressed: () async {
-                            try {
-                              var valtodelete = [];
-                              valtodelete.add("${widget.e}");
-                              var list = widget.e.toString().split('%2F');
-                              var list2 = list[2].split("?alt");
+                            showDialog<String>(
+                              context: widget.context,
+                              builder: (BuildContext context) => AlertDialog(
+                                title: const Text(''),
+                                content: globals.initlistimages.length == 1
+                                    ? const Text(
+                                        'Atleast one image is required!')
+                                    : const Text(
+                                        'Are you sure you want to delete this image?'),
+                                actions: <Widget>[
+                                  globals.initlistimages.length != 1
+                                      ? TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context),
+                                          child: const Text('No'),
+                                        )
+                                      : const SizedBox(),
+                                  TextButton(
+                                    onPressed: () async {
+                                      // ignore: use_build_context_synchronously
+                                      print('hjjjjjjjjj');
+                                      print(globals.initlistimages.length);
+                                      if (globals.initlistimages.length != 1) {
+                                        globals.initlistimages.remove(widget.e);
+                                        provider.imagelistvalue =
+                                            globals.initlistimages;
+                                        provider.changeimagelist();
+                                        // provider.imagelistvalue = globals.imageList;
+                                        // provider.changeimagelist();
+                                        Navigator.pop(
+                                            context, "globals.initlistimages");
+                                        deleteImage();
+                                      }
 
-                              print("property/${list[1]}/${list2[0]}");
-                              final storageRef = FirebaseStorage.instance.ref();
-                              final desertRef = storageRef
-                                  .child("property/${list[1]}/${list2[0]}");
-                              await desertRef.delete();
-                              await FirebaseFirestore.instance
-                                  .collection("State")
-                                  .doc('City')
-                                  .collection(widget.city)
-                                  .doc(widget.propertyId)
-                                  .update({
-                                'propertyimage':
-                                    FieldValue.arrayRemove(valtodelete),
-                              });
-                              showToast(
-                                  context: context, "deleted successfully");
-                            } catch (e) {
-                              print("wewewwwwwwwwww$e");
-                            }
-
-                            // globals.imageList.remove(widget.e);
+                                      // ignore: use_build_context_synchronously
+                                      // Navigator.pushReplacement(
+                                      //   context,
+                                      //   MaterialPageRoute(
+                                      //       builder: (context) =>
+                                      //           const ProfilePage()),
+                                      // );
+                                    },
+                                    child: globals.initlistimages.length == 1
+                                        ? TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context),
+                                            child: const Text('Okay'),
+                                          )
+                                        : const Text('Yes'),
+                                  ),
+                                ],
+                              ),
+                            );
+                            // deleteImage();
+                            // globals.initlistimages.remove(widget.e);
                             // provider.imagelistvalue = globals.imageList;
                             // provider.changeimagelist();
-                            // Navigator.pop(context, globals.imageList);
+                            // Navigator.pop(context, globals.initlistimages);
                           },
                         ),
                       ),
                     ],
-                  ),
-          ],
-        ),
+                  );
+                }),
+        ]),
       ),
     );
+  }
+
+  void deleteImage() async {
+    try {
+      var valtodelete = [];
+      valtodelete.add("${widget.e}");
+      var list = widget.e.toString().split('%2F');
+      var list2 = list[2].split("?alt");
+
+      print("property/${list[1]}/${list2[0]}");
+      final storageRef = FirebaseStorage.instance.ref();
+      final desertRef = storageRef.child("property/${list[1]}/${list2[0]}");
+      await desertRef.delete();
+      await FirebaseFirestore.instance
+          .collection("State")
+          .doc('City')
+          .collection(widget.city)
+          .doc(widget.propertyId)
+          .update({
+        'propertyimage': FieldValue.arrayRemove(valtodelete),
+      });
+      showToast(context: context, "deleted successfully");
+    } catch (e) {
+      print("wewewwwwwwwwww$e");
+    }
   }
 }

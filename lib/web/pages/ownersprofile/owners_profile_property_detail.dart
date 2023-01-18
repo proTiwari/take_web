@@ -11,15 +11,15 @@ import '../../Widgets/google_map_card.dart';
 import '../../Widgets/profile_card.dart';
 import '../../models/user_model.dart';
 
-class Property extends StatefulWidget {
+class OwnersProfileProperty extends StatefulWidget {
   var detail;
-  Property({Key? key, this.detail}) : super(key: key);
+  OwnersProfileProperty({Key? key, this.detail}) : super(key: key);
 
   @override
-  State<Property> createState() => _PropertyState();
+  State<OwnersProfileProperty> createState() => _OwnersProfilePropertyState();
 }
 
-class _PropertyState extends State<Property> {
+class _OwnersProfilePropertyState extends State<OwnersProfileProperty> {
   UserModel? valuedata;
   var currentUser = '';
 
@@ -61,8 +61,6 @@ class _PropertyState extends State<Property> {
           profileimage = valuedata?.profileImage;
           valuedata?.profileImage;
           globals.ownerprofiledata = valuedata;
-          print("isjfowjeo");
-          print(valuedata!.id);
           valuedata;
         });
         print("valuedata ${valuedata?.address}");
@@ -107,7 +105,7 @@ class _PropertyState extends State<Property> {
                 const SizedBox(
                   height: 15,
                 ),
-                OwnerProfileCard(widget.detail, profileimage, valuedata),
+                // OwnerProfileCard(widget.detail, profileimage, valuedata),
                 DetailCard(widget.detail),
                 ContactDetail(widget.detail),
                 GoogleMapCard()
@@ -115,12 +113,13 @@ class _PropertyState extends State<Property> {
             ),
           ),
         ),
-        bottomNavigationBar: currentUser == widget.detail["id"]
-            ? const SizedBox()
-            : Padding(
-                padding: const EdgeInsets.all(6.0),
-                child: DetailButton(widget.detail, currentUser),
-              ),
+        bottomNavigationBar:
+            currentUser == widget.detail["id"]
+                ? const SizedBox()
+                : Padding(
+                    padding: const EdgeInsets.all(6.0),
+                    child: DetailButton(widget.detail, currentUser),
+                  ),
       ),
     );
   }

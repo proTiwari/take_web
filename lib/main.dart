@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:take_web/web/Widgets/bottom_nav_bar.dart';
 import 'package:take_web/web/models/user_model.dart';
+import 'package:take_web/web/pages/list_property/agreement_document.dart';
 import 'package:take_web/web/pages/responsive_layout.dart';
 //app imports
 import 'package:take_web/web/pages/signin_page/phone_login.dart';
@@ -47,16 +48,19 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (_) => BaseProvider()),
         ChangeNotifierProvider(create: (_) => SigninProvider()),
         ChangeNotifierProvider(create: (_) => SignupProvider()),
-        // StreamProvider<UserModel?>.value(
-        //       value: FirebaseServices().currentUserDetails,
-        //       initialData: null,
-        //     ),
+        StreamProvider<UserModel?>.value(
+          value: FirebaseServices().currentUserDetails,
+          initialData: null,
+        ),
       ],
       child: MaterialApp(
         // initialRoute: '/',
         // routes: {
         //   '/':(context) =>  auth.currentUser == null ? LoginApp(): const SplashScreen(),
         // },
+        routes: {
+          '/policy': (context) => AgreementDocument(),
+        },
         home: StreamBuilder(
           stream: FirebaseAuth.instance.authStateChanges(),
           builder: (context, snapshot) {

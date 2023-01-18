@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +33,13 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void initState() {
     getChatandAdmin();
+    Timer(const Duration(milliseconds: 1000), () {
+      listScrollController.animateTo(
+        listScrollController.position.maxScrollExtent,
+        curve: Curves.easeOut,
+        duration: const Duration(milliseconds: 750),
+      );
+    });
     super.initState();
   }
 
@@ -127,36 +136,46 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   chatMessages() {
-    return SizedBox(
-      height: MediaQuery.of(context).size.height * 0.8,
-      child: StreamBuilder(
-        stream: chats,
-        builder: (context, AsyncSnapshot snapshot) {
-          if (listScrollController.hasClients) {
-            final position = listScrollController.position.maxScrollExtent;
-            listScrollController.jumpTo(position);
-          }
-          return snapshot.hasData
-              ? ListView.builder(
-                  controller: listScrollController,
-                  itemCount: snapshot.data.docs.length,
-                  itemBuilder: (context, index) {
-                    return MessageTile(
-                        message: snapshot.data.docs[index]['message'],
-                        sender: snapshot.data.docs[index]['sender'],
-                        sentByMe: FirebaseAuth.instance.currentUser!.uid ==
-                            snapshot.data.docs[index]['sender']);
-                  },
-                )
-              : Container();
-        },
+    return MediaQuery.removePadding(
+      context: context,
+      removeTop: true,
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height * 0.8,
+        child: StreamBuilder(
+          stream: chats,
+          builder: (context, AsyncSnapshot snapshot) {
+            Timer(const Duration(milliseconds: 100), () {
+      listScrollController.animateTo(
+        listScrollController.position.maxScrollExtent,
+        curve: Curves.easeOut,
+        duration: const Duration(milliseconds: 750),
+      );
+    });
+            return snapshot.hasData
+                ? MediaQuery.removePadding(
+                    context: context,
+                    removeTop: true,
+                    child: ListView.builder(
+                      controller: listScrollController,
+                      itemCount: snapshot.data.docs.length,
+                      itemBuilder: (context, index) {
+                        return MessageTile(
+                            message: snapshot.data.docs[index]['message'],
+                            sender: snapshot.data.docs[index]['sender'],
+                            sentByMe: FirebaseAuth.instance.currentUser!.uid ==
+                                snapshot.data.docs[index]['sender']);
+                      },
+                    ),
+                  )
+                : Container();
+          },
+        ),
       ),
     );
   }
 
   sendMessage() {
     if (messageController.text.isNotEmpty) {
-      
       Map<String, dynamic> chatMessageMap = {
         "message": messageController.text,
         "sender": FirebaseAuth.instance.currentUser!.uid,
@@ -168,11 +187,6 @@ class _ChatPageState extends State<ChatPage> {
         messageController.clear();
       });
     }
-    final position = listScrollController.position.maxScrollExtent;
-      listScrollController.animateTo(
-        position,
-        duration: const Duration(seconds: 5),
-        curve: Curves.easeOut,
-      );
+    
   }
 }

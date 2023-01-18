@@ -5,6 +5,7 @@ import 'package:csc_picker/csc_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:image_picker_web/image_picker_web.dart';
 import 'dart:convert';
 import 'package:snippet_coder_utils/ProgressHUD.dart';
@@ -16,6 +17,7 @@ import 'package:take_web/web/Widgets/paralleldropdownlist.dart';
 import '../../Widgets/image_upload_card.dart';
 import '../../Widgets/loaded_images.dart';
 import '../../providers/base_providers.dart';
+import 'agreement_document.dart';
 import 'list_provider.dart';
 
 class ListProperty extends StatefulWidget {
@@ -34,6 +36,7 @@ class _ListPropertyState extends State<ListProperty> {
   String firstName = "";
   String lastName = "";
   String bodyTemp = "";
+  bool agreement = false;
 
   late Timer timer;
 
@@ -449,7 +452,7 @@ class _ListPropertyState extends State<ListProperty> {
                                     child: DropdownButton(
                                       hint: provider.wanttotext == ''
                                           ? const Text(
-                                              "Want you want to sell property or rent it?",
+                                              "Want to sell property or rent it?",
                                               style: TextStyle(
                                                 fontSize: 16,
                                                 color: Color.fromARGB(
@@ -1597,12 +1600,57 @@ class _ListPropertyState extends State<ListProperty> {
                           const SizedBox(
                             height: 20,
                           ),
+                          Row(
+                            children: <Widget>[
+                              const SizedBox(
+                                width: 10,
+                              ), //SizedBox
+                              Checkbox(
+                                value: agreement,
+                                onChanged: (value) {
+                                  setState(() {
+                                    agreement = value!;
+                                  });
+                                  print(agreement);
+                                },
+                              ),
+                              const SizedBox(width: 10),
+                              InkWell(
+                                  child: const Text(
+                                    'agree to terms and conditions',
+                                    style: TextStyle(
+                                        color: Colors.deepPurpleAccent,
+                                        fontSize: 17.0),
+                                  ),
+                                  onTap: () => {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (BuildContext context) =>
+                                                AgreementDocument(),
+                                          ),
+                                        )
+                                      }),
+                              // Text(
+                              //   'agree to terms and conditions',
+                              //   style: TextStyle(fontSize: 17.0),
+                              // ), //Checkbox
+                            ], //<Widget>[]
+                          ),
+                          const SizedBox(
+                            height: 20,
+                          ),
                           Consumer<ListProvider>(
                             builder: (context, provider, child) {
                               return true
                                   ? InkWell(
                                       onTap: () async {
-                                        provider.submit(context);
+                                        if (agreement == true) {
+                                          provider.submit(context);
+                                        } else {
+                                          showToast(context:context,
+                                              "Please agree to the terms and conditions");
+                                        }
                                       },
                                       child: Stack(
                                         // mainAxisAlignment:

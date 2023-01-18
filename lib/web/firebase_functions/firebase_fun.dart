@@ -12,6 +12,7 @@ FirebaseAuth _auth = FirebaseAuth.instance;
 class FirebaseServices extends ChangeNotifier {
   List valuedata = [];
   List owerpropertydata = [];
+  ValueNotifier<List> valuepropertydata = ValueNotifier<List>([]);
   getProperties() async {
     valuedata = [];
     try {
@@ -56,7 +57,10 @@ class FirebaseServices extends ChangeNotifier {
                     foodservice: value.get("foodservice"),
                     paymentduration: value.get("paymentduration"),
                   ),
+                  
                   valuedata.add(propertyModel),
+                  notifyListeners(),
+                  valuepropertydata.value = valuedata
                 })
             .whenComplete(() => {})
             .catchError((error) {
@@ -127,6 +131,7 @@ class FirebaseServices extends ChangeNotifier {
                     propertyId: value.get("propertyId"),
                     propertyimage: value.get("propertyimage"),
                     pincode: value.get("pincode"),
+                    id:value.get('id'),
                     streetaddress: value.get("streetaddress"),
                     wantto: value.get("wantto"),
                     advancemoney: value.get("advancemoney"),

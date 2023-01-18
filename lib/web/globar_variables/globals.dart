@@ -10,6 +10,7 @@ var logintoken;
 var list;
 var city = 'City';
 List imageList = [];
+List uploadingimageList = [];
 List property = [];
 var userdata;
 var name = '';
@@ -19,6 +20,7 @@ var address = '';
 var ownerprofiledata;
 const webScreenSize = 600;
 List listofproperties = [];
+List initlistimages = [];
 bool userexist() {
   bool exist;
   try {

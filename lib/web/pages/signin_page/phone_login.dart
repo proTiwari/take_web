@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:take_web/web/pages/signup_page/phone_signup.dart';
@@ -20,7 +21,7 @@ class LoginApp extends StatefulWidget {
 
 class _LoginAppState extends State<LoginApp> {
   final _codeController = TextEditingController();
-  final _phoneController = TextEditingController();
+  static final _phoneController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
@@ -63,8 +64,8 @@ class _LoginAppState extends State<LoginApp> {
                       height: 25,
                     ),
                     SizedBox(
-                      height: 180,
-                      width: 450,
+                      height: 80,
+                      width: 350,
                       child: Container(),
                     ),
                     const SizedBox(
@@ -129,6 +130,7 @@ class _LoginAppState extends State<LoginApp> {
                           ),
                           GestureDetector(
                             onTap: () {
+                              FocusScope.of(context).unfocus();
                               provider.loginUser(
                                   _phoneController.text, context);
                               print(provider.loading);
@@ -181,14 +183,20 @@ class _LoginAppState extends State<LoginApp> {
                                     text: 'Need Help With Your Account?',
                                     style: linkStyle,
                                     recognizer: TapGestureRecognizer()
-                                      ..onTap = () {
-                                        // print("signup");
-                                        // Navigator.push(
-                                        //     context,
-                                        //     MaterialPageRoute(
-                                        //         builder: (context) =>
-                                        //             SignUpPage()));
-                                      })
+                                      ..onTap = () async {
+                                        print('jkjbkk');
+                                        final Uri params = Uri(
+                                            scheme: 'mailto',
+                                            path: 'team@runforrent.com',
+                                            query: 'subject=Query about App');
+                                        var mailurl = params.toString();
+                                        if (await canLaunch(mailurl)) {
+                                          await launch(mailurl);
+                                        } else {
+                                          throw 'Could not launch $mailurl';
+                                        }
+                                      },
+                                      )
                               ],
                             ),
                           ),
