@@ -9,7 +9,7 @@ class SmallCard extends StatelessWidget {
     return Container(
       // color: Colors.grey.shade200,
       margin: const EdgeInsets.all(3.0),
-      padding: const EdgeInsets.fromLTRB(9, 3, 9, 3),
+      padding: const EdgeInsets.fromLTRB(9, 3.4, 9, 3),
       height: 30,
 
       decoration: BoxDecoration(
@@ -29,7 +29,7 @@ class SmallCard extends StatelessWidget {
         text: TextSpan(
           children: [
             TextSpan(
-              style: TextStyle(
+              style: const TextStyle(
                   color: Colors.black45,
                   fontSize: 13
               ),

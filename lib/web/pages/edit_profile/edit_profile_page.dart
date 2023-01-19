@@ -1,19 +1,20 @@
-import 'dart:js_util';
+import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:image_picker_web/image_picker_web.dart';
 import 'package:provider/provider.dart';
+import 'package:take_web/web/Widgets/bottom_nav_bar.dart';
 import 'package:take_web/web/firebase_functions/firebase_fun.dart';
 import 'package:take_web/web/pages/profile_page/profile_page.dart';
 import 'package:take_web/web/globar_variables/globals.dart' as globals;
 import '../../Widgets/image_upload_card.dart';
-import '../../Widgets/loaded_images.dart';
 import '../../Widgets/loader_image_property_edit.dart';
 import '../../Widgets/uploading_image_property_image.dart';
 import '../list_property/list_provider.dart';
@@ -31,6 +32,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   String propertyon = '';
   bool loading = false;
   bool loadingdelete = false;
+  final ImagePicker _picker = ImagePicker();
   static final RegExp emailvalidation = RegExp(
       r'^(([^<>()[\]\\.,;:\s@\”]+(\.[^<>()[\]\\.,;:\s@\”]+)*)|(\”.+\”))@((\[[0–9]{1,3}\.[0–9]{1,3}\.[0–9]{1,3}\.[0–9]{1,3}\])|(([a-zA-Z\-0–9]+\.)+[a-zA-Z]{2,}))$');
   TextEditingController name = TextEditingController();
@@ -62,32 +64,34 @@ class _EditProfilePageState extends State<EditProfilePage> {
   void initState() {
     super.initState();
     try {
-      print(widget.valuedata.email);
+      print(widget.valuedata['email']);
       setState(() {
-        propertyon = widget.valuedata.wantto;
+        propertyon = widget.valuedata['wantto'];
       });
-      name.text = widget.valuedata.ownername;
-      email.text = widget.valuedata.email;
-      foodservice.text = widget.valuedata.foodservice;
-      phone.text = widget.valuedata.mobilenumber;
-      whatsapp.text = widget.valuedata.whatsappnumber;
-      advanvemoney.text = widget.valuedata.advancemoney;
-      amount.text = widget.valuedata.amount;
-      areaofland.text = widget.valuedata.areaofland;
-      streetaddress.text = widget.valuedata.streetaddress;
-      propertyname.text = widget.valuedata.propertyname;
-      sharing.text = widget.valuedata.sharing;
-      pincode.text = widget.valuedata.pincode;
-      paymentduration.text = widget.valuedata.paymentduration;
-      numberoffloors.text = widget.valuedata.numberoffloors;
-      numberofrooms.text = widget.valuedata.numberofrooms;
-      servicetype.text = widget.valuedata.servicetype;
-      discription.text = widget.valuedata.description == 'null'
-          ? "   -"
-          : widget.valuedata.description;
+      name.text = widget.valuedata['ownername'];
+      email.text = widget.valuedata['email'];
+      foodservice.text = widget.valuedata['foodservice'];
+      phone.text = widget.valuedata['mobilenumber'];
+      whatsapp.text = widget.valuedata['whatsappnumber'];
+      advanvemoney.text = widget.valuedata['advancemoney'];
+      amount.text = widget.valuedata['amount'];
+      areaofland.text = widget.valuedata['areaofland'];
+      streetaddress.text = widget.valuedata['streetaddress'];
+      propertyname.text = widget.valuedata['propertyname'];
+      sharing.text = widget.valuedata['sharing'];
+      pincode.text = widget.valuedata['pincode'];
+      paymentduration.text = widget.valuedata['paymentduration'];
+      numberoffloors.text = widget.valuedata['numberoffloors'];
+      numberofrooms.text = widget.valuedata['numberofrooms'];
 
-      initImageList = widget.valuedata.propertyimage;
-      globals.initlistimages = widget.valuedata.propertyimage;
+      servicetype.text = widget.valuedata['servicetype'];
+      discription.text = widget.valuedata['description'] == 'null'
+          ? "   -"
+          : widget.valuedata['description'];
+
+      initImageList = widget.valuedata['propertyimage'];
+      print(initImageList);
+      globals.initlistimages = widget.valuedata['propertyimage'];
     } catch (e) {
       print("ttttttttttttt");
       print(e.toString());
@@ -149,14 +153,27 @@ class _EditProfilePageState extends State<EditProfilePage> {
         .join();
   }
 
-  uploadImage(listofimg) async {
-    var uid = FirebaseAuth.instance.currentUser!.uid;
-    if (listofimg.isNotEmpty) {
-      try {
-        print(listofimg.length);
+  Future<Uint8List?> testCompressFile(File pickedFile) async {
+    var result = await FlutterImageCompress.compressWithFile(
+      pickedFile.absolute.path,
+      minWidth: 2300,
+      minHeight: 1500,
+      quality: 94,
+      rotate: 90,
+    );
+    print(pickedFile.lengthSync());
+    print(result?.length);
+    return result;
+  }
 
-        for (var i = 0; i < listofimg.length; i++) {
-          var file = listofimg[i];
+  uploadImage(List listImage) async {
+    var uid = FirebaseAuth.instance.currentUser!.uid;
+    if (listImage.isNotEmpty) {
+      try {
+        print(listImage.length);
+
+        for (var i = 0; i < listImage.length; i++) {
+          var file = listImage[i];
           final firebaseStorage = FirebaseStorage.instance;
 
           if (file != null) {
@@ -164,48 +181,108 @@ class _EditProfilePageState extends State<EditProfilePage> {
             var snapshot;
             try {
               var pathpass = generateRandomString(34);
-              // print(file.path);
+              var selectedImage = File(file!.path);
+              var uploadimage = await testCompressFile(selectedImage);
+              print(file.path);
               snapshot = await firebaseStorage
                   .ref()
                   .child('property/$uid/$pathpass')
-                  .putData(file)
+                  .putData(uploadimage!)
                   .whenComplete(() =>
                       {print("success....................................")});
             } catch (e) {
+              loading = false;
               print("failed....................................");
               print(e);
             }
 
             var download = await snapshot.ref.getDownloadURL();
             downloadUrl.add(download);
+            print(downloadUrl);
 
             // setState(() {
             //   imageUrl = downloadUrl;
             // });
-          } else {}
+          } else {
+            loading = false;
+          }
         }
         return downloadUrl;
-      } catch (e) {}
+      } catch (e) {
+        loading = false;
+      }
     } else {
+      // loading = false;
       // showToast(
-      //   "Atleast one property image is needed!",
+      //   "atleast one property image is needed!",
       //   context: context,
       //   animation: StyledToastAnimation.none,
       // );
     }
   }
 
+  // uploadImage(listofimg) async {
+  //   var uid = FirebaseAuth.instance.currentUser!.uid;
+  //   if (listofimg.isNotEmpty) {
+  //     try {
+  //       print(listofimg.length);
+
+  //       for (var i = 0; i < listofimg.length; i++) {
+  //         var file = listofimg[i];
+  //         final firebaseStorage = FirebaseStorage.instance;
+
+  //         if (file != null) {
+  //           //Upload to Firebase
+  //           var snapshot;
+  //           try {
+  //             var pathpass = generateRandomString(34);
+  //             // print(file.path);
+  //             snapshot = await firebaseStorage
+  //                 .ref()
+  //                 .child('property/$uid/$pathpass')
+  //                 .putData(file)
+  //                 .whenComplete(() =>
+  //                     {print("success....................................")});
+  //           } catch (e) {
+  //             print("failed....................................");
+  //             print(e);
+  //           }
+
+  //           var download = await snapshot.ref.getDownloadURL();
+  //           downloadUrl.add(download);
+
+  //           // setState(() {
+  //           //   imageUrl = downloadUrl;
+  //           // });
+  //         } else {}
+  //       }
+  //       return downloadUrl;
+  //     } catch (e) {}
+  //   } else {
+  //     // showToast(
+  //     //   "Atleast one property image is needed!",
+  //     //   context: context,
+  //     //   animation: StyledToastAnimation.none,
+  //     // );
+  //   }
+  // }
+
   void takePhoto(ImageSource source) async {
-    var pickedFile = (await ImagePickerWeb.getImageAsBytes())!;
+    final pickedFile = await _picker.pickImage(
+      source: source,
+    );
 
     setState(() {
       imageFile = pickedFile;
-      if (pickedFile.isNotEmpty) {
+      if (pickedFile != null) {
         heightImage = true;
       }
       listImage.add(pickedFile);
+
       listImage.remove(null);
-      globals.uploadingimageList = listImage;
+      globals.imageList = listImage;
+      ListProvider().uploadimagelist = listImage;
+      ListProvider().uploadingimagelist();
     });
   }
 
@@ -1134,7 +1211,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       onTap: () {
                         setState(
                           () {
-                            // initImageList = provider.imagelistvalue;
+                            initImageList = provider.imagelistvalue;
                             print(initImageList);
                           },
                         );
@@ -1146,10 +1223,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                           if (true)
                             ...(initImageList).map(
                               (e) {
-                                return LoadedImagePropertyEdit(
+                                return oldimagedelete(
                                     e,
-                                    widget.valuedata.city,
-                                    widget.valuedata.propertyId,
+                                    widget.valuedata['city'],
+                                    widget.valuedata['propertyId'],
                                     context);
                               },
                             ),
@@ -1167,13 +1244,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               onTap: () {
                                 setState(
                                   () {
-                                    listImage = provider.uploadimagelist;
-                                    print(listImage);
-                                    if (listImage.isEmpty) {
-                                      setState(() {
-                                        heightImage = false;
-                                      });
-                                    }
+                                    Future.delayed(const Duration(seconds: 1),
+                                        () {
+                                      listImage = provider.uploadimagelist;
+                                      print(listImage);
+                                      if (listImage.isEmpty) {
+                                        setState(() {
+                                          heightImage = false;
+                                        });
+                                      }
+                                    });
                                   },
                                 );
                               },
@@ -1184,7 +1264,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                   if (listImage != [])
                                     ...listImage.map(
                                       (e) {
-                                        return UploadingImageProperty(e);
+                                        return newpropertyimage(e);
                                       },
                                     ),
                                 ],
@@ -1229,7 +1309,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                     // ignore: use_build_context_synchronously
                                     Navigator.pop(context, 'Yes');
                                     await deleteProperty();
-                                   
                                   },
                                   child: const Text('Yes'),
                                 ),
@@ -1277,24 +1356,257 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             loading = true;
                           });
                           print('this is start');
+                          try {
+                            if (widget.valuedata['wantto'] == 'Sell property') {
+                              if (name.text != '' && name.text != 'null') {
+                                if (pincode.text != '' &&
+                                    pincode.text != 'null' &&
+                                    _isNumeric(pincode.text)) {
+                                  if (propertyname.text != '' &&
+                                      propertyname.text != 'null') {
+                                    if (streetaddress.text != '' &&
+                                        streetaddress.text != 'null') {
+                                      if (whatsapp.text != '' &&
+                                          whatsapp.text != 'null' &&
+                                          _isNumeric(whatsapp.text
+                                              .toString()
+                                              .split('+')[1])) {
+                                        if (numberoffloors.text != '' &&
+                                            numberoffloors.text != 'null' &&
+                                            _isNumeric(numberoffloors.text)) {
+                                          if (numberofrooms.text != '' &&
+                                              numberofrooms.text != 'null' &&
+                                              numberofrooms.text !=
+                                                  "How many rooms does your property have?") {
+                                            if (phone.text != '' &&
+                                                phone.text != 'null' &&
+                                                _isNumeric(phone.text
+                                                    .toString()
+                                                    .split('+')[1])) {
+                                              if (email.text != '' &&
+                                                  email.text != 'null' &&
+                                                  emailvalidation
+                                                      .hasMatch(email.text)) {
+                                                if (areaofland.text != '' &&
+                                                    areaofland.text != 'null' &&
+                                                    _isNumeric(
+                                                        areaofland.text)) {
+                                                  if (amount.text != '' &&
+                                                      amount.text != 'null' &&
+                                                      _isNumeric(amount.text)) {
+                                                    if (advanvemoney.text !=
+                                                            '' &&
+                                                        advanvemoney.text !=
+                                                            'null' &&
+                                                        advanvemoney.text !=
+                                                            'Any Advance Money?') {
+                                                      try {
+                                                        var uid = FirebaseAuth
+                                                            .instance
+                                                            .currentUser!
+                                                            .uid;
+                                                        print('4');
+                                                        await FirebaseFirestore
+                                                            .instance
+                                                            .collection('City')
+                                                            .doc(widget
+                                                                    .valuedata[
+                                                                'propertyId'])
+                                                            .update({
+                                                          "advancemoney":
+                                                              advanvemoney.text,
+                                                          "amount": amount.text,
+                                                          'areaofland':
+                                                              areaofland.text,
+                                                          'description':
+                                                              discription.text,
+                                                          'email': email.text,
+                                                          'mobilenumber':
+                                                              phone.text,
+                                                          'numberofrooms':
+                                                              numberofrooms
+                                                                  .text,
+                                                          'ownername':
+                                                              name.text,
+                                                          'numberoffloors':
+                                                              numberoffloors
+                                                                  .text,
+                                                          'pincode':
+                                                              pincode.text,
+                                                          'propertyname':
+                                                              propertyname.text,
+                                                          'streetaddress':
+                                                              streetaddress
+                                                                  .text,
+                                                          'whatsappnumber':
+                                                              whatsapp.text,
+                                                        }).whenComplete(() => {
+                                                                  // showToast("")
+                                                                });
+                                                        print('7');
+                                                        print('8');
+                                                        List listdatalink =
+                                                            await uploadImage(
+                                                                listImage);
+                                                        if (listdatalink !=
+                                                            null) {
+                                                          await FirebaseFirestore
+                                                              .instance
+                                                              .collection(
+                                                                  'City')
+                                                              .doc(widget
+                                                                      .valuedata[
+                                                                  'propertyId'])
+                                                              .update({
+                                                            'propertyimage':
+                                                                FieldValue
+                                                                    .arrayUnion(
+                                                                        listdatalink),
+                                                          });
+                                                        }
+                                                        setState(() {
+                                                          loading = false;
+                                                        });
+                                                        Navigator.pop(context);
+                                                        // ignore: use_build_context_synchronously
+                                                        // Navigator
+                                                        //     .pushReplacement(
+                                                        //   context,
+                                                        // MaterialPageRoute(
+                                                        //     builder: (context) =>
+                                                        //         CustomBottomNavigation(
+                                                        //             "",
+                                                        //             "",
+                                                        //             "profile")),
+                                                        // );
+                                                      } catch (e) {
+                                                        setState(() {
+                                                          loading = false;
+                                                        });
+                                                        print(
+                                                            "this is the error: ${e.toString()}");
+                                                      }
+                                                    } else {
+                                                      setState(() {
+                                                        loading = false;
+                                                      });
+                                                      showToast(
+                                                          context: context,
+                                                          "Advance money field not selected!");
+                                                    }
+                                                  } else {
+                                                    setState(() {
+                                                      loading = false;
+                                                    });
+                                                    showToast(
+                                                        context: context,
+                                                        "Amount mentioned is invalid!");
+                                                  }
+                                                } else {
+                                                  setState(() {
+                                                    loading = false;
+                                                  });
+                                                  showToast(
+                                                      context: context,
+                                                      "Area of land field is invalid!");
+                                                }
+                                              } else {
+                                                setState(() {
+                                                  loading = false;
+                                                });
+                                                showToast(
+                                                    context: context,
+                                                    "Email is invalid!");
+                                              }
+                                            } else {
+                                              setState(() {
+                                                loading = false;
+                                              });
+                                              showToast(
+                                                  context: context,
+                                                  "Phone is invalid!");
+                                            }
+                                          } else {
+                                            setState(() {
+                                              loading = false;
+                                            });
+                                            showToast(
+                                                context: context,
+                                                "Number of rooms field not selected!");
+                                          }
+                                        } else {
+                                          setState(() {
+                                            loading = false;
+                                          });
+                                          showToast(
+                                              context: context,
+                                              "Number of floor field not selected!");
+                                        }
+                                      } else {
+                                        setState(() {
+                                          loading = false;
+                                        });
+                                        showToast(
+                                            context: context,
+                                            "What's app number field is invalid!");
+                                      }
+                                    } else {
+                                      setState(() {
+                                        loading = false;
+                                      });
+                                      showToast(
+                                          context: context,
+                                          "Complete address field is invalid!");
+                                    }
+                                  } else {
+                                    setState(() {
+                                      loading = false;
+                                    });
+                                    showToast(
+                                        context: context,
+                                        "Property name field is invalid!");
+                                  }
+                                } else {
+                                  setState(() {
+                                    loading = false;
+                                  });
+                                  showToast(
+                                      context: context,
+                                      "Pincode field is invalid!");
+                                }
+                              } else {
+                                setState(() {
+                                  loading = false;
+                                });
+                                showToast(
+                                    context: context, "Name field is invalid!");
+                              }
+                            }
+                          } catch (e) {
+                            print("this is the kinga error: ${e.toString()}");
+                            showToast(context: context, e.toString());
+                            setState(() {
+                              loading = false;
+                            });
+                          }
                           // showToast(context: context,"Advance money field not selected!");
-                          if (widget.valuedata.wantto == 'Sell property') {
-                            if (name.text != '' && name.text != 'null') {
-                              if (pincode.text != '' &&
-                                  pincode.text != 'null' &&
-                                  _isNumeric(pincode.text)) {
-                                if (propertyname.text != '' &&
-                                    propertyname.text != 'null') {
-                                  if (streetaddress.text != '' &&
-                                      streetaddress.text != 'null') {
-                                    if (whatsapp.text != '' &&
-                                        whatsapp.text != 'null' &&
-                                        _isNumeric(whatsapp.text
-                                            .toString()
-                                            .split('+')[1])) {
-                                      if (numberoffloors.text != '' &&
-                                          numberoffloors.text != 'null' &&
-                                          _isNumeric(numberoffloors.text)) {
+
+                          //rent property
+                          try {
+                            if (widget.valuedata['wantto'] == 'Rent property') {
+                              if (name.text != '' && name.text != 'null') {
+                                if (paymentduration.text != '' &&
+                                    paymentduration.text != 'null') {
+                                  if (pincode.text != '' &&
+                                      pincode.text != 'null' &&
+                                      _isNumeric(pincode.text)) {
+                                    if (streetaddress.text != '' &&
+                                        streetaddress.text != 'null') {
+                                      if (whatsapp.text != '' &&
+                                          whatsapp.text != 'null' &&
+                                          _isNumeric(whatsapp.text
+                                              .toString()
+                                              .split('+')[1])) {
                                         if (numberofrooms.text != '' &&
                                             numberofrooms.text != 'null' &&
                                             numberofrooms.text !=
@@ -1308,94 +1620,141 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                                 email.text != 'null' &&
                                                 emailvalidation
                                                     .hasMatch(email.text)) {
-                                              if (areaofland.text != '' &&
-                                                  areaofland.text != 'null' &&
-                                                  _isNumeric(areaofland.text)) {
-                                                if (amount.text != '' &&
-                                                    amount.text != 'null' &&
-                                                    _isNumeric(amount.text)) {
-                                                  if (advanvemoney.text != '' &&
-                                                      advanvemoney.text !=
+                                              if (amount.text != '' &&
+                                                  amount.text != 'null' &&
+                                                  _isNumeric(amount.text)) {
+                                                if (advanvemoney.text != '' &&
+                                                    advanvemoney.text !=
+                                                        'null' &&
+                                                    advanvemoney.text !=
+                                                        'Any Advance Money?') {
+                                                  if (foodservice.text != '' &&
+                                                      foodservice.text !=
                                                           'null' &&
-                                                      advanvemoney.text !=
-                                                          'Any Advance Money?') {
-                                                    try {
-                                                      var uid = FirebaseAuth
-                                                          .instance
-                                                          .currentUser!
-                                                          .uid;
-                                                      print('4');
-                                                      await FirebaseFirestore
-                                                          .instance
-                                                          .collection('State')
-                                                          .doc('City')
-                                                          .collection(widget
-                                                              .valuedata.city)
-                                                          .doc(widget.valuedata
-                                                              .propertyId)
-                                                          .update({
-                                                        "advancemoney":
-                                                            advanvemoney.text,
-                                                        "amount": amount.text,
-                                                        'areaofland':
-                                                            areaofland.text,
-                                                        'description':
-                                                            discription.text,
-                                                        'email': email.text,
-                                                        'mobilenumber':
-                                                            phone.text,
-                                                        'numberofrooms':
-                                                            numberofrooms.text,
-                                                        'ownername': name.text,
-                                                        'numberoffloors':
-                                                            numberoffloors.text,
-                                                        'pincode': pincode.text,
-                                                        'propertyname':
-                                                            propertyname.text,
-                                                        'streetaddress':
-                                                            streetaddress.text,
-                                                        'whatsappnumber':
-                                                            whatsapp.text,
-                                                      }).whenComplete(() => {
-                                                                // showToast("")
-                                                              });
-                                                      print('7');
-                                                      print('8');
-                                                      List listdatalink =
-                                                          await uploadImage(
-                                                              listImage);
-                                                      await FirebaseFirestore
-                                                          .instance
-                                                          .collection('State')
-                                                          .doc('City')
-                                                          .collection(widget
-                                                              .valuedata.city)
-                                                          .doc(widget.valuedata
-                                                              .propertyId)
-                                                          .update({
-                                                        'propertyimage':
-                                                            FieldValue.arrayUnion(
-                                                                listdatalink),
-                                                      });
-                                                      await getUser();
-                                                      await FirebaseServices()
-                                                          .getProperties();
+                                                      foodservice.text !=
+                                                          'Food service?') {
+                                                    if (servicetype.text !=
+                                                            '' &&
+                                                        servicetype.text !=
+                                                            'null' &&
+                                                        servicetype.text !=
+                                                            'Which of the following is your property type?') {
+                                                      if (sharing.text != '' &&
+                                                          sharing.text !=
+                                                              'null' &&
+                                                          sharing.text !=
+                                                              'Number of sharing?') {
+                                                        try {
+                                                          var uid = FirebaseAuth
+                                                              .instance
+                                                              .currentUser!
+                                                              .uid;
+                                                          print('4');
+                                                          await FirebaseFirestore
+                                                              .instance
+                                                              .collection(
+                                                                  'City')
+                                                              .doc(widget
+                                                                      .valuedata[
+                                                                  'propertyId'])
+                                                              .update({
+                                                            "advancemoney":
+                                                                advanvemoney
+                                                                    .text,
+                                                            "amount":
+                                                                amount.text,
+                                                            'description':
+                                                                discription
+                                                                    .text,
+                                                            'servicetype':
+                                                                servicetype
+                                                                    .text,
+                                                            'paymentduration':
+                                                                paymentduration
+                                                                    .text,
+                                                            'foodservice':
+                                                                foodservice
+                                                                    .text,
+                                                            'email': email.text,
+                                                            'sharing':
+                                                                sharing.text,
+                                                            'mobilenumber':
+                                                                phone.text,
+                                                            'numberofrooms':
+                                                                numberofrooms
+                                                                    .text,
+                                                            'ownername':
+                                                                name.text,
+                                                            'pincode':
+                                                                pincode.text,
+                                                            'streetaddress':
+                                                                streetaddress
+                                                                    .text,
+                                                            'whatsappnumber':
+                                                                whatsapp.text,
+                                                          }).whenComplete(
+                                                                  () => {
+                                                                        // showToast("")
+                                                                      });
+                                                          print('7');
+                                                          print('8');
+                                                          List listdatalink =
+                                                              await uploadImage(
+                                                                  listImage);
+                                                          if (listdatalink !=
+                                                              null) {
+                                                            await FirebaseFirestore
+                                                                .instance
+                                                                .collection(
+                                                                    'City')
+                                                                .doc(widget
+                                                                        .valuedata[
+                                                                    'propertyId'])
+                                                                .update({
+                                                              'propertyimage':
+                                                                  FieldValue
+                                                                      .arrayUnion(
+                                                                          listdatalink),
+                                                            });
+                                                          }
+
+                                                          setState(() {
+                                                            loading = false;
+                                                          });
+                                                          // ignore: use_build_context_synchronously
+                                                          Navigator.pop(
+                                                              context);
+                                                          // Navigator
+                                                          //     .pushReplacement(
+                                                          //   context,
+                                                          //   MaterialPageRoute(
+                                                          //     builder: (context) =>
+                                                          //     Navigator.pop(context),
+                                                          //         // CustomBottomNavigation("","","profile"),
+                                                          //   ),
+                                                          // );
+                                                        } catch (e) {
+                                                          setState(() {
+                                                            loading = false;
+                                                          });
+                                                          print(
+                                                              "this is the error: ${e.toString()}");
+                                                        }
+                                                      } else {
+                                                        setState(() {
+                                                          loading = false;
+                                                        });
+                                                        showToast(
+                                                            context: context,
+                                                            "Sharing field not selected!");
+                                                      }
+                                                    } else {
                                                       setState(() {
                                                         loading = false;
                                                       });
-                                                      // ignore: use_build_context_synchronously
-                                                      Navigator.pushReplacement(
-                                                        context,
-                                                        MaterialPageRoute(
-                                                            builder: (context) =>
-                                                                const ProfilePage()),
-                                                      );
-                                                    } catch (e) {
-                                                      setState(() {
-                                                        loading = false;
-                                                      });
-                                                      print(
-                                                          "this is the error: ${e.toString()}");
+                                                      showToast(
+                                                          context: context,
+                                                          "Service type field not selected!");
                                                     }
                                                   } else {
                                                     setState(() {
@@ -1403,7 +1762,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                                     });
                                                     showToast(
                                                         context: context,
-                                                        "Advance money field not selected!");
+                                                        "Food service field not selected!");
                                                   }
                                                 } else {
                                                   setState(() {
@@ -1411,7 +1770,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                                   });
                                                   showToast(
                                                       context: context,
-                                                      "Amount mentioned is invalid!");
+                                                      "Advance money field not selected!");
                                                 }
                                               } else {
                                                 setState(() {
@@ -1419,7 +1778,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                                 });
                                                 showToast(
                                                     context: context,
-                                                    "Area of land field is invalid!");
+                                                    "Amount mentioned is invalid!");
                                               }
                                             } else {
                                               setState(() {
@@ -1451,7 +1810,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                         });
                                         showToast(
                                             context: context,
-                                            "Number of floor field not selected!");
+                                            "What's app number field is invalid!");
                                       }
                                     } else {
                                       setState(() {
@@ -1459,7 +1818,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                       });
                                       showToast(
                                           context: context,
-                                          "What's app number field is invalid!");
+                                          "Complete address field is invalid!");
                                     }
                                   } else {
                                     setState(() {
@@ -1467,7 +1826,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                     });
                                     showToast(
                                         context: context,
-                                        "Complete address field is invalid!");
+                                        "Pincode field is invalid!");
                                   }
                                 } else {
                                   setState(() {
@@ -1475,262 +1834,22 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                   });
                                   showToast(
                                       context: context,
-                                      "Property name field is invalid!");
+                                      "Payment duration field not selected!");
                                 }
                               } else {
                                 setState(() {
                                   loading = false;
                                 });
                                 showToast(
-                                    context: context,
-                                    "Pincode field is invalid!");
+                                    context: context, "Name field is invalid!");
                               }
-                            } else {
-                              setState(() {
-                                loading = false;
-                              });
-                              showToast(
-                                  context: context, "Name field is invalid!");
                             }
-                          }
-
-                          //rent property
-                          if (widget.valuedata.wantto == 'Rent property') {
-                            if (name.text != '' && name.text != 'null') {
-                              if (paymentduration.text != '' &&
-                                  paymentduration.text != 'null') {
-                                if (pincode.text != '' &&
-                                    pincode.text != 'null' &&
-                                    _isNumeric(pincode.text)) {
-                                  if (streetaddress.text != '' &&
-                                      streetaddress.text != 'null') {
-                                    if (whatsapp.text != '' &&
-                                        whatsapp.text != 'null' &&
-                                        _isNumeric(whatsapp.text
-                                            .toString()
-                                            .split('+')[1])) {
-                                      if (numberofrooms.text != '' &&
-                                          numberofrooms.text != 'null' &&
-                                          numberofrooms.text !=
-                                              "How many rooms does your property have?") {
-                                        if (phone.text != '' &&
-                                            phone.text != 'null' &&
-                                            _isNumeric(phone.text
-                                                .toString()
-                                                .split('+')[1])) {
-                                          if (email.text != '' &&
-                                              email.text != 'null' &&
-                                              emailvalidation
-                                                  .hasMatch(email.text)) {
-                                            if (amount.text != '' &&
-                                                amount.text != 'null' &&
-                                                _isNumeric(amount.text)) {
-                                              if (advanvemoney.text != '' &&
-                                                  advanvemoney.text != 'null' &&
-                                                  advanvemoney.text !=
-                                                      'Any Advance Money?') {
-                                                if (foodservice.text != '' &&
-                                                    foodservice.text !=
-                                                        'null' &&
-                                                    foodservice.text !=
-                                                        'Food service?') {
-                                                  if (servicetype.text != '' &&
-                                                      servicetype.text !=
-                                                          'null' &&
-                                                      servicetype.text !=
-                                                          'Which of the following is your property type?') {
-                                                    if (sharing.text != '' &&
-                                                        sharing.text !=
-                                                            'null' &&
-                                                        sharing.text !=
-                                                            'Number of sharing?') {
-                                                      try {
-                                                        var uid = FirebaseAuth
-                                                            .instance
-                                                            .currentUser!
-                                                            .uid;
-                                                        print('4');
-                                                        await FirebaseFirestore
-                                                            .instance
-                                                            .collection('State')
-                                                            .doc('City')
-                                                            .collection(widget
-                                                                .valuedata.city)
-                                                            .doc(widget
-                                                                .valuedata
-                                                                .propertyId)
-                                                            .update({
-                                                          "advancemoney":
-                                                              advanvemoney.text,
-                                                          "amount": amount.text,
-                                                          'description':
-                                                              discription.text,
-                                                          'servicetype':
-                                                              servicetype.text,
-                                                          'paymentduration':
-                                                              paymentduration
-                                                                  .text,
-                                                          'foodservice':
-                                                              foodservice.text,
-                                                          'email': email.text,
-                                                          'sharing':
-                                                              sharing.text,
-                                                          'mobilenumber':
-                                                              phone.text,
-                                                          'numberofrooms':
-                                                              numberofrooms
-                                                                  .text,
-                                                          'ownername':
-                                                              name.text,
-                                                          'pincode':
-                                                              pincode.text,
-                                                          'streetaddress':
-                                                              streetaddress
-                                                                  .text,
-                                                          'whatsappnumber':
-                                                              whatsapp.text,
-                                                        }).whenComplete(() => {
-                                                                  // showToast("")
-                                                                });
-                                                        print('7');
-                                                        print('8');
-                                                        List listdatalink =
-                                                            await uploadImage(
-                                                                listImage);
-                                                        await FirebaseFirestore
-                                                            .instance
-                                                            .collection('State')
-                                                            .doc('City')
-                                                            .collection(widget
-                                                                .valuedata.city)
-                                                            .doc(widget
-                                                                .valuedata
-                                                                .propertyId)
-                                                            .update({
-                                                          'propertyimage':
-                                                              FieldValue.arrayUnion(
-                                                                  listdatalink),
-                                                        });
-                                                        setState(() {
-                                                          loading = false;
-                                                        });
-                                                        // ignore: use_build_context_synchronously
-                                                        Navigator.pushReplacement(
-                                                            context,
-                                                            MaterialPageRoute(
-                                                                builder:
-                                                                    (context) =>
-                                                                        const ProfilePage()));
-                                                      } catch (e) {
-                                                        setState(() {
-                                                          loading = false;
-                                                        });
-                                                        print(
-                                                            "this is the error: ${e.toString()}");
-                                                      }
-                                                    } else {
-                                                      setState(() {
-                                                        loading = false;
-                                                      });
-                                                      showToast(
-                                                          context: context,
-                                                          "Sharing field not selected!");
-                                                    }
-                                                  } else {
-                                                    setState(() {
-                                                      loading = false;
-                                                    });
-                                                    showToast(
-                                                        context: context,
-                                                        "Service type field not selected!");
-                                                  }
-                                                } else {
-                                                  setState(() {
-                                                    loading = false;
-                                                  });
-                                                  showToast(
-                                                      context: context,
-                                                      "Food service field not selected!");
-                                                }
-                                              } else {
-                                                setState(() {
-                                                  loading = false;
-                                                });
-                                                showToast(
-                                                    context: context,
-                                                    "Advance money field not selected!");
-                                              }
-                                            } else {
-                                              setState(() {
-                                                loading = false;
-                                              });
-                                              showToast(
-                                                  context: context,
-                                                  "Amount mentioned is invalid!");
-                                            }
-                                          } else {
-                                            setState(() {
-                                              loading = false;
-                                            });
-                                            showToast(
-                                                context: context,
-                                                "Email is invalid!");
-                                          }
-                                        } else {
-                                          setState(() {
-                                            loading = false;
-                                          });
-                                          showToast(
-                                              context: context,
-                                              "Phone is invalid!");
-                                        }
-                                      } else {
-                                        setState(() {
-                                          loading = false;
-                                        });
-                                        showToast(
-                                            context: context,
-                                            "Number of rooms field not selected!");
-                                      }
-                                    } else {
-                                      setState(() {
-                                        loading = false;
-                                      });
-                                      showToast(
-                                          context: context,
-                                          "What's app number field is invalid!");
-                                    }
-                                  } else {
-                                    setState(() {
-                                      loading = false;
-                                    });
-                                    showToast(
-                                        context: context,
-                                        "Complete address field is invalid!");
-                                  }
-                                } else {
-                                  setState(() {
-                                    loading = false;
-                                  });
-                                  showToast(
-                                      context: context,
-                                      "Pincode field is invalid!");
-                                }
-                              } else {
-                                setState(() {
-                                  loading = false;
-                                });
-                                showToast(
-                                    context: context,
-                                    "Payment duration field not selected!");
-                              }
-                            } else {
-                              setState(() {
-                                loading = false;
-                              });
-                              showToast(
-                                  context: context, "Name field is invalid!");
-                            }
+                          } catch (e) {
+                            print("dddd--: ${e.toString()}");
+                            showToast(context: context, e.toString());
+                            setState(() {
+                              loading = false;
+                            });
                           }
                         },
                         child: Container(
@@ -1778,6 +1897,258 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
+  List istodelete = [];
+  Widget oldimagedelete(e, city, propertyid, BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+      height: 100,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(570),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(children: [
+          e == null
+              ? Container()
+              : Consumer<ListProvider>(builder: (context, provider, child) {
+                  return Stack(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: Colors.white,
+                        radius: 50.0,
+                        child: Image.network(
+                          e,
+                          fit: BoxFit.fill,
+                        ),
+                      ),
+                      const Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Icon(
+                            Icons.circle,
+                            color: Color.fromARGB(255, 255, 255, 255),
+                            size: 43,
+                          )),
+                      Positioned(
+                        bottom: -3,
+                        right: -3,
+                        child: IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () async {
+                            showDialog<String>(
+                              context: context,
+                              builder: (BuildContext context) => AlertDialog(
+                                title: const Text(''),
+                                content: globals.initlistimages.length == 1
+                                    ? const Text(
+                                        'Atleast one image is required!')
+                                    : const Text(
+                                        'Are you sure you want to delete this image?'),
+                                actions: <Widget>[
+                                  globals.initlistimages.length != 1
+                                      ? TextButton(
+                                          onPressed: () =>
+                                              Navigator.pop(context),
+                                          child: const Text('No'),
+                                        )
+                                      : const SizedBox(),
+                                  TextButton(
+                                    onPressed: () async {
+                                      // ignore: use_build_context_synchronously
+                                      // print('hjjjjjjjjj');
+                                      // print(globals.initlistimages.length);
+                                      if (globals.initlistimages.length != 1) {
+                                        istodelete.add(e);
+                                        // globals.initlistimages.remove(widget.e);
+                                        // provider.imagelistvalue =
+                                        //     globals.initlistimages;
+                                        // provider.changeimagelist();
+                                        // provider.imagelistvalue = globals.imageList;
+                                        // provider.changeimagelist();
+                                        setState(() {
+                                          istodelete;
+                                        });
+                                        Navigator.pop(
+                                            context, "globals.initlistimages");
+                                        deleteImage(e, propertyid);
+                                      }
+
+                                      // ignore: use_build_context_synchronously
+                                      // Navigator.pushReplacement(
+                                      //   context,
+                                      //   MaterialPageRoute(
+                                      //       builder: (context) =>
+                                      //           const ProfilePage()),
+                                      // );
+                                    },
+                                    child: globals.initlistimages.length == 1
+                                        ? TextButton(
+                                            onPressed: () =>
+                                                Navigator.pop(context),
+                                            child: const Text('Okay'),
+                                          )
+                                        : const Text('Yes'),
+                                  ),
+                                ],
+                              ),
+                            );
+                            // deleteImage();
+                            // globals.initlistimages.remove(widget.e);
+                            // provider.imagelistvalue = globals.imageList;
+                            // provider.changeimagelist();
+                            // Navigator.pop(context, globals.initlistimages);
+                          },
+                        ),
+                      ),
+                      istodelete.contains(e)
+                          ? const Positioned(
+                              bottom: 38,
+                              right: 35,
+                              child: Center(
+                                child: SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.blueAccent,
+                                    )),
+                              ),
+                            )
+                          : const SizedBox()
+                    ],
+                  );
+                }),
+        ]),
+      ),
+    );
+  }
+
+  void deleteImage(e, propertyid) async {
+    try {
+      var valtodelete = [];
+      valtodelete.add("${e}");
+      var list = e.toString().split('%2F');
+      var list2 = list[2].split("?alt");
+
+      print("property/${list[1]}/${list2[0]}");
+      final storageRef = FirebaseStorage.instance.ref();
+      final desertRef = storageRef.child("property/${list[1]}/${list2[0]}");
+      await desertRef.delete();
+      await FirebaseFirestore.instance
+          .collection("City")
+          .doc(propertyid)
+          .update({
+        'propertyimage': FieldValue.arrayRemove(valtodelete),
+      });
+      showToast(context: context, "deleted successfully");
+      setState(() {
+        initImageList.remove(e);
+      });
+    } catch (e) {
+      print("wewewwwwwwwwww$e");
+    }
+  }
+
+  Widget newpropertyimage(item) {
+    print("1");
+    // print(widget.e);
+    print("2");
+    print("9");
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+      height: 100,
+      decoration: BoxDecoration(
+        // boxShadow: [
+
+        // ],
+        color: Colors.white,
+        // color: Theme.of(context).primaryColor,
+        borderRadius: BorderRadius.circular(570),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            item == null
+                ? Container()
+                : Consumer<ListProvider>(builder: (context, provider, child) {
+                    return Stack(children: [
+                      CircleAvatar(
+                        radius: 50.0,
+                        backgroundImage: FileImage(File(item.path)),
+                      ),
+                      const Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Icon(
+                            Icons.circle,
+                            color: Color.fromARGB(255, 255, 255, 255),
+                            size: 43,
+                          )),
+                      Positioned(
+                          bottom: -3,
+                          right: -3,
+                          child: IconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () async {
+                              // globals.uploadingimageList.remove(item);
+                              // provider.uploadimagelist =
+                              //     globals.uploadingimageList;
+                              setState(() {
+                                listImage.remove(item);
+                              });
+                              // provider.uploadingimagelist();
+                              // Navigator.pop(context, globals.imageList);
+                            },
+                          )),
+                    ]);
+                  }
+                    // : Consumer<ListProvider>(
+                    //     builder: (context, provider, child) {
+                    //       return Stack(children: [
+                    //         CircleAvatar(
+                    //           backgroundColor: Colors.white,
+                    //           radius: 50.0,
+                    //           child: Image.memory(
+                    //             widget.e,
+                    //             fit: BoxFit.fill,
+                    //           ),
+                    //         ),
+                    //         const Positioned(
+                    //           bottom: 0,
+                    //           right: 0,
+                    //           child: Icon(
+                    //             Icons.circle,
+                    //             color: Color.fromARGB(255, 255, 255, 255),
+                    //             size: 43,
+                    //           ),
+                    //         ),
+                    //         Positioned(
+                    //           bottom: -3,
+                    //           right: -3,
+                    //           child: IconButton(
+                    //             icon: const Icon(Icons.delete),
+                    //             onPressed: () {
+                    //               setState(() {
+                    //                 globals.uploadingimageList.remove(widget.e);
+                    //                 provider.uploadimagelist =
+                    //                     globals.uploadingimageList;
+                    //                 provider.uploadingimagelist();
+                    //                 // Navigator.pop(context, globals.imageList);
+                    //               });
+                    //             },
+                    //           ),
+                    //         ),
+                    //       ]);
+                    //     },
+                    //   ),
+                    )
+          ],
+        ),
+      ),
+    );
+  }
+
   bool _isNumeric(String str) {
     if (str == "null") {
       return false;
@@ -1790,7 +2161,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       setState(() {
         loadingdelete = true;
       });
-      for (var i in widget.valuedata.propertyimage) {
+      for (var i in widget.valuedata['propertyimage']) {
         var list = i.split('%2F');
         var list2 = list[2].split("?alt");
         print("property/${list[1]}/${list2[0]}");
@@ -1798,19 +2169,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
         final desertRef = storageRef.child("property/${list[1]}/${list2[0]}");
         await desertRef.delete();
       }
-      var val = [];
-      val.add("${widget.valuedata.city}/${widget.valuedata.propertyId}");
+
       await FirebaseFirestore.instance
-          .collection("Users")
-          .doc(FirebaseAuth.instance.currentUser!.uid)
-          .update({
-        'properties': FieldValue.arrayRemove(val),
-      });
-      await FirebaseFirestore.instance
-          .collection("State")
-          .doc('City')
-          .collection(widget.valuedata.city)
-          .doc(widget.valuedata.propertyId)
+          .collection("City")
+          .doc(widget.valuedata['propertyId'])
           .delete();
       showToast(context: context, "property deleted successfully");
     } catch (e) {

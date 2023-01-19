@@ -3,57 +3,117 @@ import 'dart:async';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:flutter/material.dart';
 
-class GoogleMapCard extends StatelessWidget {
-  GoogleMapCard( {Key? key})
-      : super(key: key);
+import '../pages/property_detail/singleloc_googlemap.dart';
 
+class GoogleMapCard extends StatefulWidget {
+  var detail;
+  GoogleMapCard(this.detail, {Key? key}) : super(key: key);
 
+  @override
+  State<GoogleMapCard> createState() => _GoogleMapCardState();
+}
+
+class _GoogleMapCardState extends State<GoogleMapCard> {
+  Set<Marker> _markers = <Marker>{};
+  bool isnotlist = false;
+  @override
+  void initState() {
+    super.initState();
+    try {
+      for (var i in widget.detail) {
+        print("ewrew: ${i['lat']}");
+        try {
+          setMarker(LatLng(i['lat'], i['lon']));
+        } catch (e) {
+          print("this si erjeoi");
+          print(e.toString());
+        }
+      }
+    } catch (e) {
+      setState(() {
+        isnotlist = true;
+      });
+      setMarker(LatLng(widget.detail['lat'], widget.detail['lon']));
+    }
+  }
+
+  setMarker(point) {
+    // var counter = markerIdCounter++;
+    // _setCircle(point, counter);
+    try {
+      final Marker marker = Marker(
+          markerId: MarkerId('marker'),
+          position: point,
+          onTap: () {},
+          icon: BitmapDescriptor.defaultMarker);
+
+      CameraPosition _kGooglePlex = CameraPosition(
+        target: point,
+        zoom: 14.4746,
+      );
+
+      setState(() {
+        _markers.add(marker);
+      });
+    } catch (e) {
+      print("this is the kinga error");
+      print(e.toString());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final Completer<GoogleMapController> _controller =
-    Completer<GoogleMapController>();
+        Completer<GoogleMapController>();
 
-    const CameraPosition _kGooglePlex = CameraPosition(
-      target: LatLng(37.42796133580664, -122.085749655962),
+    CameraPosition _kGooglePlex = CameraPosition(
+      target: isnotlist
+          ? LatLng(widget.detail['lat'], widget.detail['lon'])
+          : LatLng(widget.detail[0]['lat'], widget.detail[0]['lon']),
       zoom: 14.4746,
     );
 
-    const CameraPosition _kLake = CameraPosition(
-        bearing: 192.8334901395799,
-        target: LatLng(37.43296265331129, -122.08832357078792),
-        tilt: 59.440717697143555,
-        zoom: 19.151926040649414);
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
-      width: MediaQuery.of(context).size.width,
-      decoration: BoxDecoration(
-        boxShadow: const [
-          BoxShadow(
-              color: Colors.grey,
-              offset: Offset(10, 15),
-              blurRadius: 15,
-              spreadRadius: 1)
-        ],
-        color: Colors.white,
-        // color: Theme.of(context).primaryColor,
-        borderRadius: BorderRadius.circular(50),
-      ),
-      child: SizedBox(
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (BuildContext context) => SingleGooglemap(
+              isnotlist
+                  ? LatLng(widget.detail['lat'], widget.detail['lon'])
+                  : LatLng(widget.detail[0]['lat'], widget.detail[0]['lon']),
+            ),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
         width: MediaQuery.of(context).size.width,
-        height: 200,
-        child: GoogleMap(
-          mapType: MapType.normal,
-          initialCameraPosition: _kGooglePlex,
-          onMapCreated: (GoogleMapController controller) {
-            _controller.complete(controller);
-          },
-
+        decoration: BoxDecoration(
+          boxShadow: const [
+            BoxShadow(
+                color: Colors.grey,
+                offset: Offset(10, 15),
+                blurRadius: 15,
+                spreadRadius: 1)
+          ],
+          color: Colors.white,
+          // color: Theme.of(context).primaryColor,
+          borderRadius: BorderRadius.circular(50),
         ),
-
-
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width,
+          height: 200,
+          child: GoogleMap(
+            mapType: MapType.normal,
+            markers: _markers,
+            initialCameraPosition: _kGooglePlex,
+            onMapCreated: (GoogleMapController controller) {
+              _controller.complete(controller);
+            },
+          ),
+        ),
       ),
     );
   }
-
 }

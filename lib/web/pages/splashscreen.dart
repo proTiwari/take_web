@@ -1,9 +1,18 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:spell_checker/spell_checker.dart';
 import 'package:take_web/web/globar_variables/globals.dart' as globals;
 import '../Widgets/bottom_nav_bar.dart';
 import '../firebase_functions/firebase_fun.dart';
+import '../services/location_services.dart';
+
+// optional distance parameter. Default is 1.0
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -14,50 +23,137 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   bool direction = false;
+  String? _currentAddress;
+  Position? _currentPosition;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    // final checker = SingleWordSpellChecker(distance: 2.0);
+    // checker.addWords(['Allahabad', 'Allahapur']);
+    // const str = 'Allahābād';
+    // final findList = checker.find(str);
+    // print(findList);
+    
     delay();
+    // getCity();
+  }
+
+  Future<void> getCity() async {
+    var data = await FirebaseFirestore.instance
+        .collection("State")
+        .doc("City")
+        .snapshots();
+    // print(
+    //   data.map(
+    //     (event) => print(event.data()!['city']),
+    //   ),
+    // );
+    print(
+      data.first.then(
+        (value) => print(value.id),
+      ),
+    );
+  }
+
+  Future<void> _getCurrentPosition() async {
+    final hasPermission =
+        await LocationService().handleLocationPermission(context);
+    print("sd");
+    if (!hasPermission) return;
+    print("dsfs");
+    try {
+      await Geolocator.getCurrentPosition(
+              desiredAccuracy: LocationAccuracy.high)
+          .then((Position position) async {
+        print("dsisw");
+        setState(() {
+          print("wew");
+          _currentPosition = position;
+          var res = LatLng(position.latitude, position.longitude);
+          globals.latlong = res;
+        });
+        await _getAddressFromLatLng(position);
+      }).catchError((e) {
+        debugPrint(e);
+        print("sd");
+      });
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
+  Future<void> _getAddressFromLatLng(Position position) async {
+    await placemarkFromCoordinates(
+            _currentPosition!.latitude, _currentPosition!.longitude)
+        .then((List<Placemark> placemarks) {
+      Placemark place = placemarks[0];
+      setState(() {
+        _currentAddress =
+            '${place.street}, ${place.subLocality},${place.locality}, ${place.postalCode}';
+        //calculate all the diffrent city name
+        if (place.locality == "Prayagraj") {
+          globals.city = "Allahabad";
+        } else {
+          globals.city = place.locality!;
+        }
+        globals.postalcode = place.postalCode;
+      });
+    }).catchError((e) {
+      debugPrint(e);
+    });
+  }
+
+  updatedeviceid() async {
+    final fcmToken = await FirebaseMessaging.instance.getToken();
+    await FirebaseFirestore.instance
+        .collection("Users")
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .update({
+          "devicetoken":fcmToken
+        });
   }
 
   void delay() async {
-    // logic for getting user location and specially city
     try {
       try {
         if (FirebaseAuth.instance.currentUser!.uid != "") {
+          await updatedeviceid();
+          await getUser();
           globals.logined = true;
         }
       } catch (e) {
         globals.logined = false;
       }
-      await getproperty("Allahābād");
-      await getUser();
-
-      // String? getStudentInformationEndpoint = "";
       try {
-        // var prefs = await SharedPreferences.getInstance();
-        // SharedPreferences.setMockInitialValues({});
-        // getStudentInformationEndpoint = prefs.getString('login');
-        // if (prefs.getString('login') != null) {
-        //   direction = true;
-        // }
+        await _getCurrentPosition();
       } catch (e) {
         print("error in splashscreen : $e");
       }
-
-      globals.city = "Allahābād";
     } catch (e) {
       print(e.toString());
     }
+    print(globals.city);
     // ignore: use_build_context_synchronously
-    Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-            builder: (BuildContext context) =>
-                CustomBottomNavigation("Allahābād")),
-        ModalRoute.withName('/'));
+    if (globals.city == null || globals.city == '') {
+      // ignore: use_build_context_synchronously
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+              builder: (BuildContext context) =>
+                  CustomBottomNavigation("Allahabad", '','')),
+          ModalRoute.withName('/'));
+    } else {
+      // ignore: use_build_context_synchronously
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+              builder: (BuildContext context) =>
+                  CustomBottomNavigation(globals.city, '','')),
+          ModalRoute.withName('/'));
+    }
+
     // Future.delayed(const Duration(seconds: 0)).then(
     //   (value) => {if (globals.property.isNotEmpty) {}},
     // );

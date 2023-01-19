@@ -15,7 +15,7 @@ class OwnerProfileCard extends StatelessWidget {
         Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => OwnersProfilePage(valuedata)));
+                builder: (context) => OwnersProfilePage(valuedata, detail, detail['uid'])));
       },
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),

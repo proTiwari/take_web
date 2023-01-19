@@ -11,27 +11,27 @@ class CardsWidget extends StatefulWidget {
   State<CardsWidget> createState() => _CardsWidgetState();
 }
 
-
 class _CardsWidgetState extends State<CardsWidget> {
   var property = '';
 
   var firstpropertyimage;
   @override
   Widget build(BuildContext context) {
-    try{
+    try {
       firstpropertyimage = widget.property['propertyimage'][0];
-    }catch(e){
-      firstpropertyimage = 'https://icons.iconarchive.com/icons/paomedia/small-n-flat/256/house-icon.png';
+    } catch (e) {
+      firstpropertyimage =
+          'https://icons.iconarchive.com/icons/paomedia/small-n-flat/256/house-icon.png';
     }
-    
+
     final width = MediaQuery.of(context).size.width;
     if (widget.property['wantto'] == 'Rent property') {
       setState(() {
-        property = 'Property on sale';
+        property = "Rental property";
       });
     } else {
       setState(() {
-        property = 'Property on rent';
+        property = 'Seller property';
       });
     }
 
@@ -40,13 +40,18 @@ class _CardsWidgetState extends State<CardsWidget> {
           vertical: 0, horizontal: width < 800 ? 10 : width * 0.24),
       // margin: EdgeInsets.all(8.0),
       decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-              color: Colors.grey.shade200,
-              offset: const Offset(5, 15),
-              blurRadius: 5,
-              spreadRadius: 3)
-        ],
+        // boxShadow: [
+        //   // BoxShadow(
+        //   //     color: Colors.grey.shade200,
+        //   //     offset: const Offset(5, 15),
+        //   //     blurRadius: 5,
+        //   //     spreadRadius: 3)
+        //   BoxShadow(
+        //       color: Color.fromARGB(255, 255, 255, 255),
+        //       // offset: const Offset(50,0),
+        //       blurRadius: 5,
+        //       spreadRadius: 5)
+        // ],
         // color: Colors.white,
         // // color: Theme.of(context).primaryColor,
         // borderRadius: BorderRadius.circular(58),
@@ -90,7 +95,7 @@ class _CardsWidgetState extends State<CardsWidget> {
                         child: Row(
                           children: [
                             SizedBox(
-                              height: 37,
+                              height: 31,
                               child: SmallCard(
                                   "${widget.property['city']}"), //widget.property['city']
                             ),

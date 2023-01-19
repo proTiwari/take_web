@@ -4,11 +4,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:take_web/web/models/property_model.dart';
 
+var devicetoken;
 var width;
 var height;
+var postalcode;
+var latlong;
 var logintoken;
 var list;
-var city = 'City';
+var city = 'Allahabad';
+var secondcall;
 List imageList = [];
 List uploadingimageList = [];
 List property = [];

@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
@@ -61,7 +62,7 @@ class _LoginAppState extends State<LoginApp> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
                     const SizedBox(
-                      height: 25,
+                      height: 85,
                     ),
                     SizedBox(
                       height: 80,
@@ -85,7 +86,7 @@ class _LoginAppState extends State<LoginApp> {
                             height: 30,
                           ),
                           const Text(
-                            "Hello",
+                            "Welcome!",
                             style: TextStyle(
                                 fontSize: 28, fontWeight: FontWeight.bold),
                           ),
@@ -93,7 +94,7 @@ class _LoginAppState extends State<LoginApp> {
                             height: 10,
                           ),
                           const Text(
-                            "Please Login to Your Account",
+                            "To access this feature please login",
                             style: TextStyle(
                               color: Colors.grey,
                               fontSize: 15,
@@ -131,9 +132,14 @@ class _LoginAppState extends State<LoginApp> {
                           GestureDetector(
                             onTap: () {
                               FocusScope.of(context).unfocus();
-                              provider.loginUser(
-                                  _phoneController.text, context);
-                              print(provider.loading);
+                              if (_phoneController.text.length == 10) {
+                                provider.loginUser(
+                                    _phoneController.text, context);
+                                print(provider.loading);
+                              } else {
+                                showToast(context:context,
+                                    "phone number must contain 10 digits");
+                              }
                             },
                             child: Container(
                               alignment: Alignment.center,
@@ -180,23 +186,23 @@ class _LoginAppState extends State<LoginApp> {
                               children: <TextSpan>[
                                 const TextSpan(text: ""),
                                 TextSpan(
-                                    text: 'Need Help With Your Account?',
-                                    style: linkStyle,
-                                    recognizer: TapGestureRecognizer()
-                                      ..onTap = () async {
-                                        print('jkjbkk');
-                                        final Uri params = Uri(
-                                            scheme: 'mailto',
-                                            path: 'team@runforrent.com',
-                                            query: 'subject=Query about App');
-                                        var mailurl = params.toString();
-                                        if (await canLaunch(mailurl)) {
-                                          await launch(mailurl);
-                                        } else {
-                                          throw 'Could not launch $mailurl';
-                                        }
-                                      },
-                                      )
+                                  text: 'Need Help With Your Account?',
+                                  style: linkStyle,
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () async {
+                                      print('jkjbkk');
+                                      final Uri params = Uri(
+                                          scheme: 'mailto',
+                                          path: 'team@runforrent.com',
+                                          query: 'subject=Query about App');
+                                      var mailurl = params.toString();
+                                      if (await canLaunch(mailurl)) {
+                                        await launch(mailurl);
+                                      } else {
+                                        throw 'Could not launch $mailurl';
+                                      }
+                                    },
+                                )
                               ],
                             ),
                           ),

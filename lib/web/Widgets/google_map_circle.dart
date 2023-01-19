@@ -6,7 +6,7 @@ class GoogleMapCircle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(9, 3, 9, 0),
+      // padding: const EdgeInsets.fromLTRB(9, 3, 9, 0),
       height: 60,
       width: 60,
       decoration: BoxDecoration(
@@ -21,8 +21,9 @@ class GoogleMapCircle extends StatelessWidget {
         // color: Theme.of(context).primaryColor,
         borderRadius: BorderRadius.circular(100),
       ),
-      child: Image.asset(
-        "assets/map3.png",
+      child: const Padding(
+        padding: EdgeInsets.all(7.0),
+        child: Icon(Icons.location_on, color: Color.fromARGB(255, 218, 69, 69), size: 50.0),
       ),
     );
   }

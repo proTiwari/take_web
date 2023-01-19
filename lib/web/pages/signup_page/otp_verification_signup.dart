@@ -26,6 +26,8 @@ class _OtpSignupPageState extends State<OtpSignupPage> {
   final _phoneController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
+
+
   @override
   Widget build(BuildContext context) {
     TextStyle defaultStyle =
@@ -54,7 +56,7 @@ class _OtpSignupPageState extends State<OtpSignupPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   const SizedBox(
-                    height: 25,
+                    height: 85,
                   ),
                   SizedBox(
                     height: 180,

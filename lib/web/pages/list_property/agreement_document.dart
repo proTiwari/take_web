@@ -20,13 +20,7 @@ const htmlData = r"""
 <p><h4><b>Governing Law This Agreement</h4></b><br> shall be governed by and construed in accordance with the laws of the Indian Constitution.</p>
 
 <p>By accepting this Agreement, you acknowledge that you have read and understood the terms and conditions outlined above and agree to be bound by them.</p>
-<p><h4><b>Camara Policy</h4></b><br>
-<p>Our app uses the camera on your device to provide the core functionality of our service. We do not collect or store any images or videos captured by the camera. The data captured by the camera is used only within the app and is not shared with any third parties. By using our app, you consent to the use of the camera on your device in accordance with this policy.
 
-We take the protection of your personal data very seriously and have implemented appropriate security measures to protect your information from unauthorized access, alteration, or destruction.
-
-If you have any questions or concerns about our privacy policy or the use of the camera in our app, please contact us at team@runforrent.com. We will be happy to provide additional information or address any issues you may have.
-</p>
 <p>25 Dec 2022<br> SHUBHAM TIWARI (CEO)</p>
 """;
 

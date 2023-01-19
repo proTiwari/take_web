@@ -39,9 +39,8 @@ class _LoadedImageState extends State<LoadedImage> {
                   : Consumer<ListProvider>(builder: (context, provider, child) {
                       return Stack(children: [
                         CircleAvatar(
-                          backgroundColor: Colors.white,
                           radius: 50.0,
-                          child: Image.memory(widget.e, fit: BoxFit.fill,),
+                          backgroundImage: FileImage(File(widget.e.path)),
                         ),
                         const Positioned(
                             bottom: 0,

@@ -85,7 +85,7 @@ class _GroupInfoState extends State<GroupInfo> {
                                   getName(widget.adminName),
                                   widget.groupName)
                                   .whenComplete(() {
-                                nextScreenReplace(context, CustomBottomNavigation(''));
+                                nextScreenReplace(context, CustomBottomNavigation('', "",''));
                               });
                             },
                             icon: const Icon(

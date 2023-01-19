@@ -1,35 +1,22 @@
-import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
-import 'dart:typed_data';
-import 'package:archive/archive_io.dart' as arc;
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:file_picker/_internal/file_picker_web.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:take_web/web/models/user_model.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:image_picker_web/image_picker_web.dart';
-import 'package:take_web/web/Widgets/bottom_nav_bar.dart';
 import 'package:take_web/web/globar_variables/globals.dart' as globals;
-import 'package:path_provider/path_provider.dart';
-import 'package:take_web/web/models/user_model.dart';
 import 'package:take_web/web/pages/edit_profile/edit_profile_page.dart';
-import 'package:take_web/web/pages/signin_page/phone_login.dart';
 import 'package:take_web/web/pages/splashscreen.dart';
 import 'package:take_web/web/providers/base_providers.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../firebase_functions/firebase_fun.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:path/path.dart' as base;
-
-import 'package:file_picker/file_picker.dart';
 
 import '../../models/property_model.dart';
 
@@ -42,7 +29,7 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage>
     with TickerProviderStateMixin {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController name = TextEditingController();
   TextEditingController address = TextEditingController();
   TextEditingController emailfield = TextEditingController();
@@ -60,10 +47,11 @@ class _ProfilePageState extends State<ProfilePage>
   bool isEdit = false;
   ValueNotifier? valuepropertydata;
   var circularProgress = 0.0;
-  bool emptyproperty = true;
   bool addressnotexist = false;
   var data;
   bool Imageloading = false;
+
+  bool loadui = false;
   @override
   void initState() {
     // TODO: implement initState
@@ -75,28 +63,6 @@ class _ProfilePageState extends State<ProfilePage>
       // print(globals.userdata['name']);
       name.text = userProvider.getUser.name!;
       emailfield.text = userProvider.getUser.email!;
-
-      try {
-        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-          setState(() {
-            data = Provider.of<FirebaseServices>(context, listen: false)
-                .getProperties();
-          });
-        });
-
-        print("kkklllk${data}");
-        if (data.length == 0) {
-          print("sdddddddddddddddddddddddddddddddddd");
-          setState(() {
-            emptyproperty = false;
-          });
-        }
-      } catch (e) {
-        setState(() {
-          emptyproperty = false;
-        });
-        print("ssdsdsdddddd${e.toString()}");
-      }
     } catch (e) {
       print(e.toString());
     }
@@ -113,25 +79,7 @@ class _ProfilePageState extends State<ProfilePage>
     valuepropertydata = await FirebaseServices().valuepropertydata;
   }
 
-  var imagedata;
-
-  void downloadimagedata() async {
-    try {
-      print("sdfjsdweweweeeeee");
-      imagedata = await FirebaseStorage.instance
-          .ref('profile/${FirebaseAuth.instance.currentUser!.uid}')
-          .getDownloadURL();
-      print("iwejwewe$imagedata");
-      setState(() {
-        imagedata;
-      });
-    } catch (e) {
-      print('dsfjoejfwe');
-      print(e.toString());
-    }
-  }
-
-  testCompressFile(File pickedFile) async {
+  Future<Uint8List?> testCompressFile(File pickedFile) async {
     var result = await FlutterImageCompress.compressWithFile(
       pickedFile.absolute.path,
       minWidth: 2300,
@@ -144,51 +92,55 @@ class _ProfilePageState extends State<ProfilePage>
     return result;
   }
 
-  Uint8List compress(Uint8List input) {
-    List<int> list = utf8.encode(input.toString());
-    Uint8List bytes = Uint8List.fromList(list);
-
-    return bytes;
-  }
-
-  Uint8List decompress(dynamic input) {
-    const decoder = arc.ZLibDecoder();
-    return decoder.decodeBytes(input) as Uint8List;
-  }
-
   final ImagePicker _picker = ImagePicker();
-  Uint8List? profileimage;
-  var download;
+  var profileimage;
   void takePhoto(ImageSource source) async {
+    final pickedFile = await _picker.pickImage(
+      source: source,
+    );
     setState(() {
       Imageloading = true;
     });
-    profileimage = (await ImagePickerWeb.getImageAsBytes())!;
-    // profileimage = compress(profileimage!);
+    if (pickedFile == null) {
+      setState(() {
+        Imageloading = false;
+      });
+    }
     setState(() {
-      profileimage;
+      profileimage = pickedFile;
     });
-
-    if (profileimage != null) {
-      var snapshot = await FirebaseStorage.instance
-          .ref('profile/${FirebaseAuth.instance.currentUser!.uid}')
-          .putData(profileimage!);
+    var selectedImage = File(pickedFile!.path);
+    var uploadimage = await testCompressFile(selectedImage);
+    var snapshot;
+    var download;
+    try {
+      final firebaseStorage = FirebaseStorage.instance;
+      snapshot = await firebaseStorage
+          .ref()
+          .child('profile/${FirebaseAuth.instance.currentUser!.uid}')
+          .putData(uploadimage!)
+          .whenComplete(() async => {});
+    } catch (e) {
+      print(e.toString());
+    }
+    try {
       download = await snapshot.ref.getDownloadURL();
-      print(download);
-
-      if (download != null) {
-        await FirebaseFirestore.instance
-            .collection("Users")
-            .doc(FirebaseAuth.instance.currentUser!.uid)
-            .update({
-          "profileImage": download,
-        }).whenComplete(
-                () => showToast(context: context, "successfully uploaded!"));
-        setState(() {
-          Imageloading = false;
-        });
-        print("success....................................");
-      }
+    } catch (e) {
+      print(e.toString());
+    }
+    if (download != null) {
+      print("sdfsfsdddddddddddddddddddddddddd");
+      await FirebaseFirestore.instance
+          .collection("Users")
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .update({
+        "profileImage": download,
+      }).whenComplete(
+              () => showToast(context: context, "successfully uploaded!"));
+      setState(() {
+        Imageloading = false;
+      });
+      print("success....................................");
     }
   }
 
@@ -202,29 +154,14 @@ class _ProfilePageState extends State<ProfilePage>
     } catch (e) {
       addressnotexist = true;
     }
-    // print("kkklllk${globals.listofproperties}");
-    try {
-      if (userProvider.getUser.properties!.isEmpty) {
-        setState(() {
-          emptyproperty = false;
-        });
-      }
-    } catch (e) {
-      setState(() {
-        emptyproperty = false;
-      });
-    }
 
+    List dataproperty = [];
     TextStyle defaultStyle =
         const TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 14.0);
     TextStyle linkStyle =
         const TextStyle(color: Color.fromARGB(255, 9, 114, 199));
     final color = Theme.of(context).colorScheme.primary;
     var width = MediaQuery.of(context).size.width;
-    Stream<DocumentSnapshot> courseDocStream = FirebaseFirestore.instance
-        .collection('Users')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .snapshots();
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -252,7 +189,7 @@ class _ProfilePageState extends State<ProfilePage>
             ),
           ),
           SizedBox(
-            width: width < 800 ? width * 0.78 : width * 0.90,
+            width: width < 800 ? width * 0.74 : width * 0.90,
           ),
           IconButton(
             onPressed: () {
@@ -390,111 +327,93 @@ class _ProfilePageState extends State<ProfilePage>
                             return TabBarView(
                               controller: tabController,
                               children: [
-                                StreamBuilder<DocumentSnapshot>(
-                                    stream: courseDocStream,
+                                StreamBuilder(
+                                    stream: FirebaseFirestore.instance
+                                        .collection("City")
+                                        .snapshots(),
                                     builder: (context,
-                                        AsyncSnapshot<DocumentSnapshot>
-                                            snapshot) {
-                                      if (snapshot.connectionState ==
-                                          ConnectionState.active) {
-                                        // get course document
-                                        var courseDocument =
-                                            snapshot.data!.data() as Map;
+                                        AsyncSnapshot<QuerySnapshot> snapshot) {
 
-                                        globals.userdata = courseDocument;
-                                        return GridView.builder(
-                                          itemCount:
-                                              courseDocument['properties']
-                                                  .length,
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return SizedBox(
+                                          height: 500,
+                                          child: Shimmer.fromColors(
+                                            baseColor: Colors.grey.shade300,
+                                            highlightColor: Colors.white,
+                                            child: Center(
+                                              child: GridView.builder(
+                                          itemCount: 3,
                                           gridDelegate:
                                               const SliverGridDelegateWithFixedCrossAxisCount(
                                                   mainAxisExtent: 200.0,
                                                   crossAxisCount: 3),
                                           itemBuilder: (context, index) {
-                                            try {
-                                              print("ffff");
-                                              var data = globals
-                                                  .userdata['properties'];
-                                              print("jjjj$data");
+                                            return Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: GestureDetector(
+                                              
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.black,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            20.0),
+                                                    // image: DecorationImage(
+                                                    //   image: ,
+                                                    //   fit: BoxFit.cover,
+                                                    // ),
+                                                  ),
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            left: 37.0,
+                                                            right: 37.0,
+                                                            top: 185.0,
+                                                            bottom: 15.0),
+                                                    child: Container(
+                                                      alignment:
+                                                          Alignment.center,
+                                                      decoration: BoxDecoration(
+                                                          color: Colors.white,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(
+                                                                      15.0)),
+                                                      child: const Text(""),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        )
+                                            ),
+                                          ),
+                                        );
+                                      }
 
-                                              for (var i in data) {
-                                                List dd = i.split("/");
-                                                print(
-                                                    "this is first value in the list: ${dd[0]}");
-                                                print(dd[1]);
-                                                // PropertyModel? propertyModel;
-                                                PropertyModel propertyModel;
-                                                FirebaseFirestore.instance
-                                                    .collection("State")
-                                                    .doc("City")
-                                                    .collection(dd[0])
-                                                    .doc(dd[1])
-                                                    .get()
-                                                    .then((value) => {
-                                                          propertyModel =
-                                                              PropertyModel(
-                                                            city: value
-                                                                .get("city"),
-                                                            state: value
-                                                                .get("state"),
-                                                            propertyId: value.get(
-                                                                "propertyId"),
-                                                            propertyimage:
-                                                                value.get(
-                                                                    "propertyimage"),
-                                                            pincode: value
-                                                                .get("pincode"),
-                                                            streetaddress:
-                                                                value.get(
-                                                                    "streetaddress"),
-                                                            wantto: value
-                                                                .get("wantto"),
-                                                            advancemoney: value.get(
-                                                                "advancemoney"),
-                                                            numberofrooms:
-                                                                value.get(
-                                                                    "numberofrooms"),
-                                                            amount: value
-                                                                .get("amount"),
-                                                            propertyname: value.get(
-                                                                "propertyname"),
-                                                            areaofland: value.get(
-                                                                "areaofland"),
-                                                            numberoffloors:
-                                                                value.get(
-                                                                    "numberoffloors"),
-                                                            ownername: value.get(
-                                                                "ownername"),
-                                                            mobilenumber: value.get(
-                                                                "mobilenumber"),
-                                                            whatsappnumber:
-                                                                value.get(
-                                                                    "whatsappnumber"),
-                                                            email: value
-                                                                .get("email"),
-                                                            description: value.get(
-                                                                "description"),
-                                                            servicetype: value.get(
-                                                                "servicetype"),
-                                                            sharing: value
-                                                                .get('sharing'),
-                                                            foodservice: value.get(
-                                                                "foodservice"),
-                                                            paymentduration:
-                                                                value.get(
-                                                                    "paymentduration"),
-                                                          ),
-                                                        })
-                                                    .whenComplete(() => {})
-                                                    .catchError((error) {
-                                                  print(error);
-                                                }); // valuedata.add(propertyModel)
-                                              }
-                                            } catch (e) {
-                                              print(
-                                                  "here is the error: ${e.toString()}");
-                                            }
+                                      var documents = snapshot.data!.docs;
+                                      print(
+                                          "jnknkjnk: ${documents.first['uid']}");
+                                      var list;
+                                      list = documents.where((doc) {
+                                        return doc.get("uid").contains(
+                                            FirebaseAuth
+                                                .instance.currentUser!.uid);
+                                      }).toList();
+                                      print("lllll/: ${list}");
 
+                                      if (snapshot.connectionState ==
+                                          ConnectionState.active) {
+                                        return GridView.builder(
+                                          itemCount: list.length,
+                                          gridDelegate:
+                                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                                  mainAxisExtent: 200.0,
+                                                  crossAxisCount: 3),
+                                          itemBuilder: (context, index) {
                                             return Padding(
                                               padding:
                                                   const EdgeInsets.all(8.0),
@@ -506,8 +425,7 @@ class _ProfilePageState extends State<ProfilePage>
                                                       builder: (BuildContext
                                                               context) =>
                                                           EditProfilePage(
-                                                              provider.valuedata[
-                                                                  index]),
+                                                              list[index]),
                                                     ),
                                                   );
                                                 }),
@@ -518,13 +436,9 @@ class _ProfilePageState extends State<ProfilePage>
                                                         BorderRadius.circular(
                                                             20.0),
                                                     image: DecorationImage(
-                                                      image: NetworkImage(provider
-                                                              .valuedata[index]
-                                                              .propertyimage[
-                                                          0]), //globals
-                                                      //   .listofproperties[index]
-                                                      // .propertyimage[0]
-
+                                                      image: NetworkImage(list[
+                                                              index]
+                                                          ['propertyimage'][0]),
                                                       fit: BoxFit.cover,
                                                     ),
                                                   ),
@@ -553,7 +467,10 @@ class _ProfilePageState extends State<ProfilePage>
                                           },
                                         );
                                       } else {
-                                        return Text("data");
+                                        return const Center(
+                                            child: CircularProgressIndicator(
+                                          color: Colors.red,
+                                        ));
                                       }
                                       // get sections from the document
                                     }),
@@ -1023,7 +940,12 @@ class _ProfilePageState extends State<ProfilePage>
     return ClipOval(
         child: Material(
       color: Colors.black12,
-      child: profileimage != null ? Image.memory(profileimage!) : image,
+      child: profileimage != null
+          ? CircleAvatar(
+              radius: 50.0,
+              backgroundImage: FileImage(File(profileimage.path)),
+            )
+          : image,
     ));
   }
 

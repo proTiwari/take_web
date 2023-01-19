@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:take_web/web/globar_variables/globals.dart' as globals;
 import 'package:take_web/web/pages/signup_page/otp_verification_signup.dart';
+import 'package:take_web/web/pages/splashscreen.dart';
 
 import '../../Widgets/bottom_nav_bar.dart';
 import '../../firebase_functions/firebase_fun.dart';
@@ -148,7 +149,8 @@ class SignupProvider extends BaseProvider implements LoaderState {
     notifyListeners();
   }
 
-  Future<void> verify(code, BuildContext context, verifyid, String name, String email, String phone) async {
+  Future<void> verify(code, BuildContext context, verifyid, String name,
+      String email, String phone) async {
     loading = true;
     notifyListeners();
     dynamic user;
@@ -159,7 +161,6 @@ class SignupProvider extends BaseProvider implements LoaderState {
       user = result.user;
 
       if (user != null) {
-
         var uid = _auth.currentUser!.uid;
         // create user
         await FirebaseFirestore.instance.collection('Users').doc(uid).set({
@@ -167,20 +168,22 @@ class SignupProvider extends BaseProvider implements LoaderState {
           "email": email,
           "phone": phone,
           "groups": [],
+          'devicetoken': globals.devicetoken,
           "id": uid
         });
         // var data = await SignupApi().signuprequest(name.value, email.value, phone.value, uid);
         // print(data);
         print("user 2");
-        await getproperty("Allahābād");
+        // await getproperty("Allahābād");
         await getUser();
         loading = false;
         notifyListeners();
         Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (BuildContext context) => CustomBottomNavigation("Allahābād")),
-            ModalRoute.withName('/')
-        );
+            MaterialPageRoute(
+                builder: (BuildContext context) =>
+                    SplashScreen()),
+            ModalRoute.withName('/'));
       } else {
         print("Error");
         showToast(context: context, "something went wrong");

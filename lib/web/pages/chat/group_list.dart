@@ -91,143 +91,13 @@ class _GroupListPageState extends State<GroupListPage> {
     var width = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
-        actions: [
-          // IconButton(
-          //   onPressed: () {
-          //     nextScreen(
-          //       context,
-          //       const SearchPage(),
-          //     );
-          //   },
-          //   icon: const Icon(
-          //     Icons.search,
-          //   ),
-          // ),
-        ],
         automaticallyImplyLeading: false,
-        elevation: 0,
         centerTitle: true,
-        backgroundColor: Theme.of(context).primaryColor,
-        title: const Text(
-          "Chats",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 27,
-          ),
-        ),
-      ),
-      /* drawer: Drawer(
-          child: ListView(
-            padding: const EdgeInsets.symmetric(vertical: 50),
-            children: <Widget>[
-              Icon(
-                Icons.account_circle,
-                size: 150,
-                color: Colors.grey[700],
-              ),
-              const SizedBox(
-                height: 15,
-              ),
-              Text(
-                userName,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              const Divider(
-                height: 2,
-              ),
-              ListTile(
-                onTap: () {},
-                selectedColor: Theme.of(context).primaryColor,
-                selected: true,
-                contentPadding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                leading: const Icon(Icons.group),
-                title: const Text(
-                  "Groups",
-                  style: TextStyle(color: Colors.black),
-                ),
-              ),
-              ListTile(
-                onTap: () {
-                */ /*  nextScreenReplace(
-                      context,
-                      ProfilePage(
-                        userName: userName,
-                        email: email,
-                      ));*/ /*
-                },
-                contentPadding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                leading: const Icon(Icons.group),
-                title: const Text(
-                  "Profile",
-                  style: TextStyle(color: Colors.black),
-                ),
-              ),
-              ListTile(
-                onTap: () async {
-                  showDialog(
-                      barrierDismissible: false,
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: const Text("Logout"),
-                          content: const Text("Are you sure you want to logout?"),
-                          actions: [
-                            IconButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              icon: const Icon(
-                                Icons.cancel,
-                                color: Colors.red,
-                              ),
-                            ),
-                            IconButton(
-                              onPressed: () async {
-                                await authService.signOut();
-                                Navigator.of(context).pushAndRemoveUntil(
-                                    MaterialPageRoute(
-                                        builder: (context) => LoginApp("",'')),
-                                        (route) => false);
-                              },
-                              icon: const Icon(
-                                Icons.done,
-                                color: Colors.green,
-                              ),
-                            ),
-                          ],
-                        );
-                      });
-                },
-                contentPadding:
-                const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                leading: const Icon(Icons.exit_to_app),
-                title: const Text(
-                  "Logout",
-                  style: TextStyle(color: Colors.black),
-                ),
-              )
-            ],
-          )),*/
-      body: groupList(), //shownomassagetext? noGroupWidget():
-      /* floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          popUpDialog(context);
-        },
         elevation: 0,
-        backgroundColor: Theme.of(context).primaryColor,
-        child: const Icon(
-          Icons.add,
-          color: Colors.white,
-          size: 30,
-        ),
-      ),*/
+        title: const Text("chats", style: TextStyle(color: Colors.black)),
+        backgroundColor: Colors.white,
+      ),
+      body: groupList(),
     );
   }
 
@@ -310,6 +180,31 @@ class _GroupListPageState extends State<GroupListPage> {
         });
   }
 
+  getprofile(groupId) async {
+    print("oifjoiejf");
+    await FirebaseFirestore.instance
+        .collection("groups")
+        .doc(groupId)
+        .get()
+        .then((value) {
+      var list = value.get("members");
+      print(list);
+      for (var i in list) {
+        if (i != FirebaseAuth.instance.currentUser!.uid) {
+          FirebaseFirestore.instance
+              .collection("Users")
+              .doc(i)
+              .get()
+              .then((value) {
+            String profileimage = value.get("profileImage");
+            print("this is profile image: ${profileimage}");
+            return profileimage;
+          });
+        }
+      }
+    });
+  }
+
   groupList() {
     //FirebaseFirestore.instance.collection("Users").doc(FirebaseAuth.instance.currentUser!.uid).snapshots()
     try {
@@ -323,6 +218,7 @@ class _GroupListPageState extends State<GroupListPage> {
           try {
             // print("sdfsdfsddewreww${snapshot.data["groups"]}");
             // make some checks
+
             if (snapshot.hasData) {
               if (snapshot.data['groups'] != null) {
                 if (snapshot.data['groups'].length != 0) {
@@ -332,11 +228,14 @@ class _GroupListPageState extends State<GroupListPage> {
                       int reverseIndex =
                           snapshot.data['groups'].length - index - 1;
                       // return Text(getId(snapshot.data['groups'][reverseIndex]));}
+                      var profileimage =
+                          getprofile(snapshot.data['groups'][reverseIndex]);
                       return Container(
                         margin: EdgeInsets.symmetric(
                             vertical: 0,
                             horizontal: width < 800 ? 10 : width * 0.24),
                         child: GroupTile(
+                            profileimage: 'profileimage',
                             groupId:
                                 getId(snapshot.data['groups'][reverseIndex]),
                             groupName:

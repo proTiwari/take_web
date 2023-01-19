@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'chat_page.dart';
@@ -7,11 +9,13 @@ class GroupTile extends StatefulWidget {
   final String userName;
   final String groupId;
   final String groupName;
+  final String profileimage;
   const GroupTile(
       {Key? key,
-        required this.groupId,
-        required this.groupName,
-        required this.userName})
+      required this.groupId,
+      required this.groupName,
+      required this.userName,
+      required this.profileimage})
       : super(key: key);
 
   @override
@@ -19,17 +23,68 @@ class GroupTile extends StatefulWidget {
 }
 
 class _GroupTileState extends State<GroupTile> {
+  String profileimage = '';
+  String owneruid = '';
+  @override
+  void initState() {
+    super.initState();
+    widget.groupId;
+    getprofile(widget.groupId);
+  }
+
+  getprofile(groupId) async {
+    try {
+      print("oifjoiejf");
+      await FirebaseFirestore.instance
+          .collection("groups")
+          .doc(groupId)
+          .get()
+          .then((value) {
+        print('jknkjn');
+        var list = value.get("members");
+        print(list);
+        print('kkkkk');
+        for (var i in list) {
+          print('iiii');
+          i = i.toString().split("_userName")[0];
+          if (i != FirebaseAuth.instance.currentUser!.uid) {
+            owneruid = i;
+            FirebaseFirestore.instance
+                .collection("Users")
+                .doc(i)
+                .get()
+                .then((value) {
+              print('ttttt${i}');
+              setState(() {
+                profileimage = value.get("profileImage");
+              });
+
+              print('uuuuu');
+              print("this is profile image: ${profileimage}");
+              return profileimage;
+            });
+          }
+        }
+      });
+    } catch (e) {
+      print("sdcssdca");
+      print(e.toString());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    print("oifjoiejf");
     return GestureDetector(
       onTap: () {
         nextScreen(
             context,
             ChatPage(
-              groupId: widget.groupId,
-              groupName: widget.groupName,
-              userName: widget.userName,
-            ));
+                owneruid: owneruid,
+                groupId: widget.groupId,
+                groupName: widget.groupName,
+                userName: widget.userName,
+                profileImage: profileimage));
       },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 5),
@@ -37,6 +92,7 @@ class _GroupTileState extends State<GroupTile> {
           leading: CircleAvatar(
             radius: 30,
             backgroundColor: Theme.of(context).primaryColor,
+            backgroundImage: NetworkImage(profileimage),
             child: Text(
               widget.groupName.substring(0, 1).toUpperCase(),
               textAlign: TextAlign.center,

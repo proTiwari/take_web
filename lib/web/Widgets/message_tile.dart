@@ -1,15 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class MessageTile extends StatefulWidget {
   final String message;
   final String sender;
   final bool sentByMe;
+  final dynamic time;
+  final bool status;
+  final String imageurl;
+  final String propertydata;
 
   const MessageTile(
       {Key? key,
       required this.message,
       required this.sender,
-      required this.sentByMe})
+      required this.sentByMe,
+      required this.time,
+      required this.status,
+      required this.imageurl,
+      required this.propertydata})
       : super(key: key);
 
   @override
@@ -66,9 +75,60 @@ class _MessageTileState extends State<MessageTile> {
               // const SizedBox(
               //   height: 8,
               // ),
-              Text(widget.message,
-                  textAlign: TextAlign.start,
-                  style: const TextStyle(fontSize: 16, color: Colors.white)),
+              // Text("${widget.message} \n",
+              //     textAlign: TextAlign.start,
+              //     style: const TextStyle(fontSize: 16, color: Colors.white)),
+              RichText(
+                text: TextSpan(
+                  // text:
+                  //     "${widget.message}\n",//MM/dd/yyyy,
+                  style: const TextStyle(color: Colors.white),
+                  children: [
+                    widget.imageurl != ''
+                        ? WidgetSpan(
+                            child: Image.network(
+                            widget.imageurl,
+                          ))
+                        : TextSpan(),
+                    widget.propertydata != ''
+                        ? TextSpan(
+                            text: widget.propertydata,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: Colors.white))
+                        : TextSpan(),
+                    TextSpan(
+                        text: widget.message,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                            color: Colors.white)),
+                    TextSpan(
+                        text:
+                            "   ${DateFormat('hh:mm a').format(widget.time.toDate())}  ",
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w300,
+                            fontSize: 11,
+                            color: Colors.white)),
+                    widget.sentByMe
+                        ? widget.status
+                            ? WidgetSpan(
+                                child: SizedBox(
+                                height: 18,
+                                width: 18,
+                                child: Image.asset("assets/seen.png"),
+                              ))
+                            : WidgetSpan(
+                                child: SizedBox(
+                                height: 18,
+                                width: 18,
+                                child: Image.asset("assets/unseen.png"),
+                              ))
+                        : TextSpan(),
+                  ],
+                ),
+              )
             ],
           ),
         ),

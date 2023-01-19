@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -10,7 +11,9 @@ import 'owners_profile_property_detail.dart';
 
 class OwnersProfilePage extends StatefulWidget {
   var valuedata;
-  OwnersProfilePage(this.valuedata, {Key? key}) : super(key: key);
+  var detail;
+  var owneruid;
+  OwnersProfilePage(this.valuedata, this.detail,this.owneruid, {Key? key}) : super(key: key);
 
   @override
   _OwnersProfilePageState createState() => _OwnersProfilePageState();
@@ -42,6 +45,31 @@ class _OwnersProfilePageState extends State<OwnersProfilePage>
       data = Provider.of<FirebaseServices>(context, listen: false)
           .getOwnerProperties(globals.ownerprofiledata.properties);
     });
+    getlocationlatlong();
+  }
+
+  List latlonglist = [];
+
+  getlocationlatlong() async {
+    try {
+      // print(widget.valuedata.id);
+      // print(widget.valuedata['id']);
+      var snapshot = await FirebaseFirestore.instance
+          .collection("City")
+          .where("uid", isEqualTo: widget.owneruid)
+          .get()
+          .then((value) {
+        // value.docs.map((e) {
+        //   latlonglist.add(e);
+        // });
+        for (var i in value.docs) {
+          latlonglist.add(i);
+        }
+        print("yyysdfsd: ${latlonglist}");
+      });
+    } catch (e) {
+      print("kejoiwejoowei: ${e.toString()}");
+    }
   }
 
   @override
@@ -51,12 +79,6 @@ class _OwnersProfilePageState extends State<OwnersProfilePage>
       globals.ownerprofiledata.address;
     } catch (e) {
       addressnotexist = true;
-    }
-    print("kkklllk${globals.listofproperties}");
-    if (globals.ownerprofiledata.properties.length == 0) {
-      setState(() {
-        emptyproperty = false;
-      });
     }
     TextStyle defaultStyle =
         const TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 14.0);
@@ -161,72 +183,90 @@ class _OwnersProfilePageState extends State<OwnersProfilePage>
                           child: TabBarView(
                             controller: tabController,
                             children: [
-                              provider.owerpropertydata.isNotEmpty
-                                  ? GridView.builder(
-                                      itemCount:
-                                          provider.owerpropertydata.length,
-                                      gridDelegate:
-                                          const SliverGridDelegateWithFixedCrossAxisCount(
-                                              mainAxisExtent: 200.0,
-                                              crossAxisCount: 3),
-                                      itemBuilder: (context, index) {
-                                        var detai = jsonEncode(
-                                            provider.owerpropertydata[index]);
-                                        print("uiuiiiuiuiuiu${detai}");
-                                        var detail = jsonDecode(detai);
-                                        return Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: GestureDetector(
-                                            onTap: () {
-                                              Navigator.push(
+                              StreamBuilder(
+                                  stream: FirebaseFirestore.instance
+                                      .collection("City")
+                                      .snapshots(),
+                                  builder: (context,
+                                      AsyncSnapshot<QuerySnapshot> snapshot) {
+                                    var documents = snapshot.data!.docs;
+                                    print(
+                                        "jnknkjnk: ${documents.first['uid']}");
+                                    var list;
+                                    list = documents.where((doc) {
+                                      return doc.get("uid").contains(
+                                          globals.ownerprofiledata.id);
+                                    }).toList();
+                                    print("lllll/: ${list}");
+
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.active) {
+                                      return GridView.builder(
+                                        itemCount: list.length,
+                                        gridDelegate:
+                                            const SliverGridDelegateWithFixedCrossAxisCount(
+                                                mainAxisExtent: 200.0,
+                                                crossAxisCount: 3),
+                                        itemBuilder: (context, index) {
+                                          return Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: GestureDetector(
+                                              onTap: (() {
+                                                Navigator.push(
                                                   context,
                                                   MaterialPageRoute(
-                                                      builder: (BuildContext
-                                                              context) =>
-                                                          OwnersProfileProperty(
-                                                              detail: detail)));
-                                            },
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                color: Colors.black,
-                                                borderRadius:
-                                                    BorderRadius.circular(20.0),
-                                                image: DecorationImage(
-                                                  image: NetworkImage(
-                                                      provider
-                                                              .owerpropertydata[
-                                                                  index]
-                                                              .propertyimage[
-                                                          0]), //globals
-                                                  //   .listofproperties[index]
-                                                  // .propertyimage[0]
-
-                                                  fit: BoxFit.cover,
+                                                    builder: (BuildContext
+                                                            context) =>
+                                                        OwnersProfileProperty(
+                                                            list[index]),
+                                                  ),
+                                                );
+                                              }),
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                  color: Colors.black,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          20.0),
+                                                  image: DecorationImage(
+                                                    image: NetworkImage(list[
+                                                            index]
+                                                        ['propertyimage'][0]),
+                                                    fit: BoxFit.cover,
+                                                  ),
                                                 ),
-                                              ),
-                                              child: Padding(
-                                                padding: const EdgeInsets.only(
-                                                    left: 37.0,
-                                                    right: 37.0,
-                                                    top: 185.0,
-                                                    bottom: 15.0),
-                                                child: Container(
-                                                  alignment: Alignment.center,
-                                                  decoration: BoxDecoration(
-                                                      color: Colors.white,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              15.0)),
-                                                  child: const Text(""),
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          left: 37.0,
+                                                          right: 37.0,
+                                                          top: 185.0,
+                                                          bottom: 15.0),
+                                                  child: Container(
+                                                    alignment: Alignment.center,
+                                                    decoration: BoxDecoration(
+                                                        color: Colors.white,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(
+                                                                    15.0)),
+                                                    child: const Text(""),
+                                                  ),
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                        );
-                                      },
-                                    )
-                                  : noGroupWidget(),
-                              GoogleMapCard(),
+                                          );
+                                        },
+                                      );
+                                    } else {
+                                      return const Center(
+                                          child: CircularProgressIndicator(
+                                        color: Colors.red,
+                                      ));
+                                    }
+                                    // get sections from the document
+                                  }),
+                              GoogleMapCard(latlonglist),
                             ],
                           ),
                         ),

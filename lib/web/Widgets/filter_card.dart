@@ -14,8 +14,8 @@ class FilterCard extends StatelessWidget {
         boxShadow: [
           BoxShadow(
               color: Colors.grey.shade200,
-              offset: const Offset(5, 15),
-              blurRadius: 5,
+              offset: const Offset(1, 1),
+              blurRadius: 1,
               spreadRadius: 0)
         ],
         color:  value == "Near me"? const Color(0xFFF27121): Colors.white,

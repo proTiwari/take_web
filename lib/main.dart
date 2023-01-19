@@ -1,12 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:g_recaptcha_v3/g_recaptcha_v3.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:take_web/web/Widgets/bottom_nav_bar.dart';
 import 'package:take_web/web/models/user_model.dart';
 import 'package:take_web/web/pages/list_property/agreement_document.dart';
 import 'package:take_web/web/pages/responsive_layout.dart';
-//app imports
+import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
 import 'package:take_web/web/pages/signin_page/phone_login.dart';
 import 'package:take_web/web/pages/signin_page/sign_in.provider.dart';
 import 'package:take_web/web/pages/signup_page/signup_provider.dart';
@@ -17,7 +19,11 @@ import 'package:take_web/web/firebase_functions/firebase_fun.dart';
 
 void main() async {
   Provider.debugCheckInvalidValueType = null;
-  WidgetsFlutterBinding.ensureInitialized();
+   WidgetsFlutterBinding.ensureInitialized();
+  if(kIsWeb){
+    bool ready = await GRecaptchaV3.ready("6LeNoQ0kAAAAABLPs9kb_boqhpavcX5haQAJKO14"); //--2 //6LeNoQ0kAAAAABLPs9kb_boqhpavcX5haQAJKO14
+    print("Is Recaptcha ready? $ready");
+  }
   await Firebase.initializeApp(
     options: const FirebaseOptions(
         apiKey: "AIzaSyB8YcmJ24lcwM_V52pCu9KqcrwzgUAJPk0",
@@ -28,7 +34,8 @@ void main() async {
         appId: "1:555235323232:web:557de2dda8636e9f0d4205",
         measurementId: "G-P3W7EWNPYY"),
   );
-  runApp(const MyApp());
+  
+  runApp(const riverpod.ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatefulWidget {

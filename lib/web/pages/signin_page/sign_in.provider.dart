@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
 import 'package:take_web/web/pages/signin_page/otp_verification_login.dart';
 import 'package:take_web/web/pages/signup_page/phone_signup.dart';
+import 'package:take_web/web/pages/splashscreen.dart';
 import 'package:take_web/web/providers/base_providers.dart';
 import '../../Widgets/bottom_nav_bar.dart';
 import '../../firebase_functions/firebase_fun.dart';
@@ -89,15 +90,14 @@ class SigninProvider extends BaseProvider implements LoaderState {
         print("uiop5 ${FirebaseAuth.instance.currentUser}");
 
         print("user 2");
-        await getproperty("Allahābād");
+        // await getproperty("Allahābād");
         await getUser();
         loading = false;
         notifyListeners();
         Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
-                builder: (BuildContext context) =>
-                    CustomBottomNavigation("Allahābād")),
+                builder: (BuildContext context) => SplashScreen()),
             ModalRoute.withName('/'));
       } else {
 /*        print("Error");

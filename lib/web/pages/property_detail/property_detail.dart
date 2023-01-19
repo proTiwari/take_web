@@ -8,6 +8,7 @@ import 'package:take_web/web/Widgets/detail_card.dart';
 import 'package:take_web/web/globar_variables/globals.dart' as globals;
 import '../../Widgets/Image_animation.dart';
 import '../../Widgets/google_map_card.dart';
+import 'package:flutter/src/widgets/framework.dart';
 import '../../Widgets/profile_card.dart';
 import '../../models/user_model.dart';
 
@@ -33,7 +34,11 @@ class _PropertyState extends State<Property> {
     } catch (e) {
       currentUser = '';
     }
-    getownerdata(widget.detail["id"]);
+    try {
+      getownerdata(widget.detail["uid"]);
+    } catch (e) {
+      print("you kinga: ${e.toString()}");
+    }
   }
 
   var profileimage;
@@ -54,7 +59,6 @@ class _PropertyState extends State<Property> {
             profileImage: value.data()!["profileImage"],
             groups: value.data()!["groups"],
             id: value.data()!["id"],
-            properties: value.data()!["properties"],
             address: value.data()!["address"]);
         profileimage = valuedata?.profileImage;
         setState(() {
@@ -76,7 +80,7 @@ class _PropertyState extends State<Property> {
     try {
       await FirebaseFirestore.instance
           .collection("Users")
-          .doc(widget.detail["id"])
+          .doc(widget.detail["uid"])
           .get()
           .then((value) {
         profileimage = value.data()!["profileImage"];
@@ -93,7 +97,7 @@ class _PropertyState extends State<Property> {
   @override
   Widget build(BuildContext context) {
     var width = MediaQuery.of(context).size.width;
-    print(widget.detail["id"]);
+    print(widget.detail["uid"]);
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -110,16 +114,16 @@ class _PropertyState extends State<Property> {
                 OwnerProfileCard(widget.detail, profileimage, valuedata),
                 DetailCard(widget.detail),
                 ContactDetail(widget.detail),
-                GoogleMapCard()
+                GoogleMapCard(widget.detail)
               ],
             ),
           ),
         ),
-        bottomNavigationBar: currentUser == widget.detail["id"]
+        bottomNavigationBar: currentUser == widget.detail["uid"]
             ? const SizedBox()
             : Padding(
                 padding: const EdgeInsets.all(6.0),
-                child: DetailButton(widget.detail, currentUser),
+                child: DetailButton(widget.detail, currentUser, profileimage),
               ),
       ),
     );

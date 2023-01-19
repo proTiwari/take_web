@@ -16,6 +16,7 @@ class OtpLoginPage extends StatefulWidget {
 class _OtpLoginPageState extends State<OtpLoginPage> {
   static final _codeController = TextEditingController();
 
+
   @override
   Widget build(BuildContext context) {
     TextStyle defaultStyle =
@@ -44,7 +45,7 @@ class _OtpLoginPageState extends State<OtpLoginPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   const SizedBox(
-                    height: 25,
+                    height: 85,
                   ),
                   SizedBox(
                     height: 80,

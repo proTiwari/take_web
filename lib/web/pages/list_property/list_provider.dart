@@ -186,12 +186,14 @@ class ListProvider extends BaseProvider {
     }
     imagelistvalue;
     notifyListeners();
-  }//uploadimagelist
+  } //uploadimagelist
 
   void uploadingimagelist() {
     uploadimagelist;
     notifyListeners();
   }
+
+  
 
   void changecity(String value) {
     if (value == "" || value == "*City" || value == "null") {
@@ -884,28 +886,17 @@ class ListProvider extends BaseProvider {
         .join();
   }
 
-  Future<File?> testCompressFile(File pickedFile) async {
-    var result = await FlutterImageCompress.compressAndGetFile(
+  Future<Uint8List?> testCompressFile(File pickedFile) async {
+    var result = await FlutterImageCompress.compressWithFile(
       pickedFile.absolute.path,
-      pickedFile.absolute.path,
-      quality: 88,
-      rotate: 180,
+      minWidth: 2300,
+      minHeight: 1500,
+      quality: 94,
+      rotate: 90,
     );
-
     print(pickedFile.lengthSync());
-    print(result?.lengthSync());
-
+    print(result?.length);
     return result;
-    // var result = await FlutterImageCompress.compressWithFile(
-    //   pickedFile.absolute.path,
-    //   minWidth: 2300,
-    //   minHeight: 1500,
-    //   quality: 94,
-    //   rotate: 90,
-    // );
-    // print(pickedFile.lengthSync());
-    // print(result?.length);
-    // return result;
   }
 
   uploadImage(context) async {
@@ -924,11 +915,13 @@ class ListProvider extends BaseProvider {
             var snapshot;
             try {
               var pathpass = generateRandomString(34);
-              // print(file.path);
+              var selectedImage = File(file!.path);
+              var uploadimage = await testCompressFile(selectedImage);
+              print(file.path);
               snapshot = await firebaseStorage
                   .ref()
                   .child('property/$uid/$pathpass')
-                  .putData(file)
+                  .putData(uploadimage!)
                   .whenComplete(() => {
                         verify = true,
                         print("success....................................")
@@ -979,10 +972,17 @@ class ListProvider extends BaseProvider {
 
   Future<void> listproperty(context) async {
     try {
+      //city name updating
+      var namecity = city.value;
+      String result = namecity.replaceAll('ā', 'a');
+      result = result.replaceAll('Ā', 'A');
+      result = result.replaceAll('ū', 'u');
+      var finalcity = result.replaceAll('ī', 'i');
+       
       listProperty(
         propertyId: generateRandomString(74),
         state: state.value,
-        city: city.value,
+        city: finalcity,
         propertyimage: downloadUrl,
         pincode: pincode.value,
         streetaddress: streetaddress.value,

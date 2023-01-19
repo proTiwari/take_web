@@ -17,7 +17,7 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController name = TextEditingController();
   TextEditingController emailfield = TextEditingController();
   TextEditingController _phoneController = TextEditingController();
@@ -27,6 +27,8 @@ class _SignUpPageState extends State<SignUpPage> {
   static final RegExp email = RegExp(
       r'^(([^<>()[\]\\.,;:\s@\”]+(\.[^<>()[\]\\.,;:\s@\”]+)*)|(\”.+\”))@((\[[0–9]{1,3}\.[0–9]{1,3}\.[0–9]{1,3}\.[0–9]{1,3}\])|(([a-zA-Z\-0–9]+\.)+[a-zA-Z]{2,}))$');
   final _codeController = TextEditingController();
+
+ 
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +90,7 @@ class _SignUpPageState extends State<SignUpPage> {
                             height: 10,
                           ),
                           const Text(
-                            "Create Your Account in Just One Click",
+                            "Let us know about you",
                             style: TextStyle(
                               color: Colors.grey,
                               fontSize: 15,

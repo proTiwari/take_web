@@ -144,9 +144,7 @@ class _LoadedImagePropertyEditState extends State<LoadedImagePropertyEdit> {
       final desertRef = storageRef.child("property/${list[1]}/${list2[0]}");
       await desertRef.delete();
       await FirebaseFirestore.instance
-          .collection("State")
-          .doc('City')
-          .collection(widget.city)
+          .collection("City")
           .doc(widget.propertyId)
           .update({
         'propertyimage': FieldValue.arrayRemove(valtodelete),
