@@ -1,10 +1,11 @@
 import 'dart:convert';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:take_web/web/globar_variables/globals.dart' as globals;
+import '../../globar_variables/globals.dart' as globals;
 import '../../Widgets/google_map_card.dart';
 import '../../firebase_functions/firebase_fun.dart';
 import 'owners_profile_property_detail.dart';
@@ -13,7 +14,8 @@ class OwnersProfilePage extends StatefulWidget {
   var valuedata;
   var detail;
   var owneruid;
-  OwnersProfilePage(this.valuedata, this.detail,this.owneruid, {Key? key}) : super(key: key);
+  OwnersProfilePage(this.valuedata, this.detail, this.owneruid, {Key? key})
+      : super(key: key);
 
   @override
   _OwnersProfilePageState createState() => _OwnersProfilePageState();
@@ -101,8 +103,8 @@ class _OwnersProfilePageState extends State<OwnersProfilePage>
                   child: Stack(
                     children: [
                       SizedBox(
-                        height: 111,
-                        width: 111,
+                        height: 70,
+                        width: 70,
                         child: Imageloading
                             ? const CircularProgressIndicator(
                                 color: Colors.blueAccent,
@@ -229,10 +231,16 @@ class _OwnersProfilePageState extends State<OwnersProfilePage>
                                                       BorderRadius.circular(
                                                           20.0),
                                                   image: DecorationImage(
-                                                    image: NetworkImage(list[
-                                                            index]
-                                                        ['propertyimage'][0]),
                                                     fit: BoxFit.cover,
+                                                    image:
+                                                        CachedNetworkImageProvider(
+                                                      list[index]
+                                                          ['propertyimage'][0],
+                                                    ),
+                                                    // image: NetworkImage(list[
+                                                    //         index]
+                                                    //     ['propertyimage'][0]),
+                                                    // fit: BoxFit.cover,
                                                   ),
                                                 ),
                                                 child: Padding(
@@ -266,7 +274,27 @@ class _OwnersProfilePageState extends State<OwnersProfilePage>
                                     }
                                     // get sections from the document
                                   }),
-                              GoogleMapCard(latlonglist),
+                              InkWell(
+                                  onTap: () {
+                                    print("clicked");
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => GoogleMapCard(
+                                              latlonglist, 500.0)),
+                                    );
+                                  },
+                                  child: Container(
+                                    color: Color.fromARGB(255, 255, 255, 255),
+                                    child: Stack(children: [
+                                      GoogleMapCard(latlonglist, 500.0),
+                                      Container(
+                                        color: Colors.transparent,
+                                        height: 500,
+                                        width: 900,
+                                      )
+                                    ]),
+                                  )),
                             ],
                           ),
                         ),

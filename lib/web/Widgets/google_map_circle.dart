@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../pages/list_property/flutter_flow/flutter_flow_theme.dart';
+
 class GoogleMapCircle extends StatelessWidget {
   const GoogleMapCircle({Key? key}) : super(key: key);
 
@@ -12,18 +14,17 @@ class GoogleMapCircle extends StatelessWidget {
       decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(
-              color: Colors.grey.shade100,
+              color: FlutterFlowTheme.of(context).secondaryBackground,
               offset: const Offset(1, 1),
               blurRadius: 0,
               spreadRadius: 3)
         ],
-        color: Colors.white,
         // color: Theme.of(context).primaryColor,
         borderRadius: BorderRadius.circular(100),
       ),
-      child: const Padding(
+      child: Padding(
         padding: EdgeInsets.all(7.0),
-        child: Icon(Icons.location_on, color: Color.fromARGB(255, 218, 69, 69), size: 50.0),
+        child: Icon(Icons.location_on, color: FlutterFlowTheme.of(context).alternate, size: 50.0),
       ),
     );
   }

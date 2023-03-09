@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:take_web/web/globar_variables/globals.dart' as globals;
+
+import '../globar_variables/globals.dart';
 
 void deletefuntion() {
-  var updatedlist = globals.imageList;
+  var updatedlist = imageList;
 }

@@ -1,16 +1,12 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:spell_checker/spell_checker.dart';
-import 'package:take_web/web/globar_variables/globals.dart' as globals;
-import '../Widgets/bottom_nav_bar.dart';
-import '../firebase_functions/firebase_fun.dart';
-import '../services/location_services.dart';
+import '../globar_variables/globals.dart';
+import 'chat/chat_page.dart';
+import 'list_property/flutter_flow/flutter_flow_util.dart';
+import 'list_property/search_place_provider.dart';
 
 // optional distance parameter. Default is 1.0
 
@@ -23,151 +19,164 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   bool direction = false;
-  String? _currentAddress;
-  Position? _currentPosition;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    // final checker = SingleWordSpellChecker(distance: 2.0);
-    // checker.addWords(['Allahabad', 'Allahapur']);
-    // const str = 'Allahābād';
-    // final findList = checker.find(str);
-    // print(findList);
-    
-    delay();
-    // getCity();
-  }
+    CurrentLocation().getCurrentPosition();
+    // 1. This method call when app in terminated state and you get a notification
+    // when you click on notification app open from terminated state and you can get notification data in this method
 
-  Future<void> getCity() async {
-    var data = await FirebaseFirestore.instance
-        .collection("State")
-        .doc("City")
-        .snapshots();
-    // print(
-    //   data.map(
-    //     (event) => print(event.data()!['city']),
-    //   ),
-    // );
-    print(
-      data.first.then(
-        (value) => print(value.id),
-      ),
+    FirebaseMessaging.instance.getInitialMessage().then(
+      (message) {
+        try {
+          print("FirebaseMessaging.instance.getInitialMessage");
+          if (message != null) {
+            print("New Notification");
+            if (message.data['navigator'] == '') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChatPage(
+                    groupId: message.data['groupId'],
+                    groupName: message.data['groupName'],
+                    userName: message.data['userName'],
+                    profileImage: message.data['profileImage'],
+                    owneruid: message.data['ownerId'],
+                  ),
+                ),
+              );
+            }
+          }
+        } catch (e) {
+          print("messaging error: ${e.toString()}");
+        }
+      },
     );
-  }
 
-  Future<void> _getCurrentPosition() async {
-    final hasPermission =
-        await LocationService().handleLocationPermission(context);
-    print("sd");
-    if (!hasPermission) return;
-    print("dsfs");
-    try {
-      await Geolocator.getCurrentPosition(
-              desiredAccuracy: LocationAccuracy.high)
-          .then((Position position) async {
-        print("dsisw");
-        setState(() {
-          print("wew");
-          _currentPosition = position;
-          var res = LatLng(position.latitude, position.longitude);
-          globals.latlong = res;
-        });
-        await _getAddressFromLatLng(position);
-      }).catchError((e) {
-        debugPrint(e);
-        print("sd");
-      });
-    } catch (e) {
-      print(e.toString());
-    }
-  }
+    // 2. This method only call when App in forground it mean app must be opened
+    FirebaseMessaging.onMessage.listen(
+      (RemoteMessage message) {
+        // try {
+        //   print("FirebaseMessaging.onMessage.listen${message.data}");
+        //   if (message.notification != null) {
+        //     print(message.notification!.title);
+        //     print(message.data);
+        //     print("message1 ${message.data}");
+        //     LocalNotificationService.createanddisplaynotification(message);
+        //     if (message.data['navigator'] == '') {
+        //       Navigator.push(
+        //         context,
+        //         MaterialPageRoute(
+        //           builder: (context) => ChatPage(
+        //             groupId: message.data['groupId'],
+        //             groupName: message.data['groupName'],
+        //             userName: message.data['userName'],
+        //             profileImage: message.data['profileImage'],
+        //             owneruid: message.data['ownerId'],
+        //           ),
+        //         ),
+        //       );
+        //     }
+        //   }
+        // } catch (e) {
+        //   print("firebasemessaging error: ${e.toString()}");
+        // }
+      },
+    );
 
-  Future<void> _getAddressFromLatLng(Position position) async {
-    await placemarkFromCoordinates(
-            _currentPosition!.latitude, _currentPosition!.longitude)
-        .then((List<Placemark> placemarks) {
-      Placemark place = placemarks[0];
-      setState(() {
-        _currentAddress =
-            '${place.street}, ${place.subLocality},${place.locality}, ${place.postalCode}';
-        //calculate all the diffrent city name
-        if (place.locality == "Prayagraj") {
-          globals.city = "Allahabad";
-        } else {
-          globals.city = place.locality!;
+    // 3. This method only call when App in background and not terminated(not closed)
+    FirebaseMessaging.onMessageOpenedApp.listen(
+      (message) {
+        try {
+          print("FirebaseMessaging.onMessageOpenedApp.listen");
+          if (message.notification != null) {
+            print(message.notification!.title);
+            print(message.notification!.body);
+            print("message.data22 ${message.data}");
+            if (message.data['navigator'] == '') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChatPage(
+                    groupId: message.data['groupId'],
+                    groupName: message.data['groupName'],
+                    userName: message.data['userName'],
+                    profileImage: message.data['profileImage'],
+                    owneruid: message.data['ownerId'],
+                  ),
+                ),
+              );
+            }
+          }
+        } catch (e) {
+          print("messaging error: ${e.toString()}");
         }
-        globals.postalcode = place.postalCode;
-      });
-    }).catchError((e) {
-      debugPrint(e);
-    });
+      },
+    );
+    Timer(
+        Duration(seconds: 2),
+        () => {
+              context.pushNamed(
+                'customnav',
+                queryParams: {
+                  'city': serializeParam(
+                    '${city}',
+                    ParamType.String,
+                  ),
+                  'secondcall': serializeParam(
+                    'Prayagraj',
+                    ParamType.String,
+                  ),
+                  'profile': serializeParam(
+                    'Prayagraj',
+                    ParamType.String,
+                  )
+                }.withoutNulls,
+                extra: <String, dynamic>{
+                  kTransitionInfoKey: const TransitionInfo(
+                    hasTransition: true,
+                    transitionType: PageTransitionType.rightToLeft,
+                    duration: Duration(milliseconds: 600),
+                  ),
+                },
+              )
+            });
+
+    // delay();
   }
 
-  updatedeviceid() async {
-    final fcmToken = await FirebaseMessaging.instance.getToken();
-    await FirebaseFirestore.instance
-        .collection("Users")
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .update({
-          "devicetoken":fcmToken
-        });
-  }
-
-  void delay() async {
-    try {
+  delay() async {
+    if (FirebaseAuth.instance.currentUser != null) {
+      logined = true;
       try {
-        if (FirebaseAuth.instance.currentUser!.uid != "") {
-          await updatedeviceid();
-          await getUser();
-          globals.logined = true;
+        await FirebaseFirestore.instance
+            .collection("Users")
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .get()
+            .then((value) => {
+                  userdata = value,
+                });
+      } catch (e) {
+        if (kDebugMode) {
+          print("getuser error: ${e.toString()}");
         }
-      } catch (e) {
-        globals.logined = false;
       }
-      try {
-        await _getCurrentPosition();
-      } catch (e) {
-        print("error in splashscreen : $e");
-      }
-    } catch (e) {
-      print(e.toString());
     }
-    print(globals.city);
-    // ignore: use_build_context_synchronously
-    if (globals.city == null || globals.city == '') {
-      // ignore: use_build_context_synchronously
-      Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-              builder: (BuildContext context) =>
-                  CustomBottomNavigation("Allahabad", '','')),
-          ModalRoute.withName('/'));
-    } else {
-      // ignore: use_build_context_synchronously
-      Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(
-              builder: (BuildContext context) =>
-                  CustomBottomNavigation(globals.city, '','')),
-          ModalRoute.withName('/'));
-    }
-
-    // Future.delayed(const Duration(seconds: 0)).then(
-    //   (value) => {if (globals.property.isNotEmpty) {}},
-    // );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Color.fromARGB(255, 255, 255, 255),
       body: Center(
-        child: SizedBox(
-            height: 220.0,
-            width: 220.0,
-            child: Image.asset('assets/runforrent1.png')),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+          child: SizedBox(
+              height: 200.0,
+              width: 200.0,
+              child: Image.asset('assets/white_back_black_front.png')),
+        ),
       ),
     );
   }

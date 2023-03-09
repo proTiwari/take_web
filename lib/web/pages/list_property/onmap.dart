@@ -3,11 +3,11 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:take_web/web/pages/list_property/search_place_provider.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart' as latlon;
 
 import '../../models/auto_complete_result.dart';
 import '../../services/map_services.dart';
+import 'search_place_provider.dart';
 
 class OnMap extends ConsumerStatefulWidget {
   OnMap({Key? key}) : super(key: key);
@@ -17,33 +17,60 @@ class OnMap extends ConsumerStatefulWidget {
 }
 
 class _OnMapState extends ConsumerState<OnMap> {
-  final Completer<GoogleMapController> _controller = Completer();
+  final Completer<latlon.GoogleMapController> _controller = Completer();
   TextEditingController searchController = TextEditingController();
   var tappedPoint;
-  static const CameraPosition _kGooglePlex = CameraPosition(
-    target: LatLng(25.435801, 81.846313),
+  static const latlon.CameraPosition _kGooglePlex = latlon.CameraPosition(
+    target: latlon.LatLng(25.435801, 81.846313),
     zoom: 14.4746,
   );
-  final Set<Marker> _markers = <Marker>{};
+  final Set<latlon.Marker> _markers = <latlon.Marker>{};
 
   @override
   void initState() {
     super.initState();
-    _markers.add(Marker(
-        markerId: const MarkerId('marker'),
-        position: const LatLng(25.435801, 81.846313),
-        onTap: () {},
-        icon: BitmapDescriptor.defaultMarker));
+    // _markers.add(Marker(
+    //     markerId: const MarkerId('marker'),
+    //     position: const LatLng(25.435801, 81.846313),
+    //     onTap: () {},
+    //     icon: BitmapDescriptor.defaultMarker));
+    _showDialog();
+  }
+
+  _showDialog() async {
+    await Future.delayed(Duration(milliseconds: 50));
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+          title: Text('Tap On Map To Get The Location :)', style: TextStyle(fontSize: 18, fontWeight: FontWeight.normal)),
+          // content: const Text('A dialog is a type of modal window that\n'
+          //     'appears in front of app content to\n'
+          //     'provide critical information, or prompt\n'
+          //     'for a decision to be made.'),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                textStyle: Theme.of(context).textTheme.labelLarge,
+              ),
+              child: const Text('Okay'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+        });
   }
 
   var points;
 
   void _setMarker(point) {
-    final Marker marker = Marker(
-        markerId: const MarkerId('marker'),
+    final latlon.Marker marker = latlon.Marker(
+        markerId: const latlon.MarkerId('marker'),
         position: point,
         onTap: () {},
-        icon: BitmapDescriptor.defaultMarker);
+        icon: latlon.BitmapDescriptor.defaultMarker);
 
     setState(() {
       _markers.add(marker);
@@ -51,12 +78,12 @@ class _OnMapState extends ConsumerState<OnMap> {
   }
 
   Future<void> gotoSearchedPlace(double lat, double lng) async {
-    final GoogleMapController controller = await _controller.future;
+    final latlon.GoogleMapController controller = await _controller.future;
 
-    controller.animateCamera(CameraUpdate.newCameraPosition(
-        CameraPosition(target: LatLng(lat, lng), zoom: 12)));
+    controller.animateCamera(latlon.CameraUpdate.newCameraPosition(
+        latlon.CameraPosition(target: latlon.LatLng(lat, lng), zoom: 12)));
 
-    _setMarker(LatLng(lat, lng));
+    _setMarker(latlon.LatLng(lat, lng));
   }
 
   Widget buildListItem(AutoCompleteResult placeItem, searchFlag) {
@@ -106,17 +133,16 @@ class _OnMapState extends ConsumerState<OnMap> {
             SizedBox(
               height: screenHeight,
               width: screenWidth,
-              child: GoogleMap(
-                mapType: MapType.normal,
+              child: latlon.GoogleMap(
+                mapType: latlon.MapType.normal,
                 markers: _markers,
                 initialCameraPosition: _kGooglePlex,
-                onMapCreated: (GoogleMapController controller) {
+                onMapCreated: (latlon.GoogleMapController controller) {
                   _controller.complete(controller);
                 },
                 onTap: (point) {
                   points = point;
                   _setMarker(point);
-
                 },
               ),
             ),

@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:take_web/web/globar_variables/globals.dart' as globals;
+import '../globar_variables/globals.dart';
 import '../pages/chat/chat_page.dart';
 import 'package:http/http.dart' as http;
 
@@ -69,12 +69,18 @@ class DatabaseService extends ChangeNotifier {
               ["${uid}_$userName", "${detail["uid"]}_userName"]),
           "groupId": groupDocumentReference.id,
         });
+        await FirebaseFirestore.instance
+            .collection("City")
+            .doc(detail['propertyId'])
+            .update({
+          'groupid': FieldValue.arrayUnion(["${groupDocumentReference.id}"])
+        });
       } catch (e) {
         print(e.toString());
       }
 
       Map<String, dynamic> chatMessageMap = {
-        "message": "\n\n Hello, I'm Interested, can we chat?",
+        "message": "Hello, I'm Interested, can we chat?",
         "imageurl": detail['propertyimage'][0],
         "propertydata": "${detail['streetaddress']}, ${detail['pincode']}",
         "sender": FirebaseAuth.instance.currentUser!.uid,
@@ -82,8 +88,17 @@ class DatabaseService extends ChangeNotifier {
         "status": false
       };
 
+      Map<String, dynamic> payload = {
+        "ownerId": detail["uid"],
+        "groupName": detail["ownername"],
+        "userName": userdata['name'],
+        "profileImage": detail["profileImage"],
+        "navigator": "",
+        "groupId": groupid
+      };
+
       await DatabaseService("sdf")
-          .sendMessage(groupDocumentReference.id, chatMessageMap);
+          .sendMessage(groupDocumentReference.id, chatMessageMap, payload);
 
       print("3${groupid}");
       groupid = groupDocumentReference.id;
@@ -97,7 +112,7 @@ class DatabaseService extends ChangeNotifier {
             userCollection.doc(detail["uid"]);
         await ownerDocumentReference.update({
           "groups": FieldValue.arrayUnion(
-              ["${groupDocumentReference.id}_${globals.userdata['name']}"])
+              ["${groupDocumentReference.id}_${userdata['name']}"])
         });
       } catch (e) {
         print("4$e");
@@ -110,7 +125,7 @@ class DatabaseService extends ChangeNotifier {
           builder: (context) => ChatPage(
             groupId: groupid,
             groupName: "${detail["ownername"]}",
-            userName: "${globals.userdata['name']}",
+            userName: "${userdata['name']}",
             profileImage: detail["profileImage"],
             owneruid: detail["uid"],
           ),
@@ -188,9 +203,12 @@ class DatabaseService extends ChangeNotifier {
     }
   }
 
+  var profile;
   // send message
-  sendMessage(String groupId, Map<String, dynamic> chatMessageData) async {
+  sendMessage(
+      String groupId, Map<String, dynamic> chatMessageData, payload) async {
     var devicetoken;
+
     var userid;
     var username;
     var message;
@@ -205,33 +223,42 @@ class DatabaseService extends ChangeNotifier {
     //send notification
     print('send notification');
 
-    await groupCollection.doc(groupId).get().then((value) {
+    await groupCollection.doc(groupId).get().then((value) async {
+      await FirebaseFirestore.instance
+          .collection("Users")
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .get()
+          .then((value) {
+        profile = value.get("profileImage");
+        username = value.get('name');
+      });
       var user1 = value.get("members")[0].toString().split("_")[0];
       var user2 = value.get("members")[1].toString().split("_")[0];
       if (user1 != FirebaseAuth.instance.currentUser!.uid) {
-        FirebaseFirestore.instance
+        await FirebaseFirestore.instance
             .collection("Users")
             .doc(value.get("members")[0].toString().split("_")[0])
             .get()
             .then((value) {
           devicetoken = value.get("devicetoken");
           username = value.get('name');
-          sendchatnotification(devicetoken, username, message);
+          sendchatnotification(devicetoken, username, message, payload);
         });
       }
 
       print("user1 ${user1}");
       if (user2 != FirebaseAuth.instance.currentUser!.uid) {
-        FirebaseFirestore.instance
+        await FirebaseFirestore.instance
             .collection("Users")
             .doc(user2)
             .get()
             .then((value) {
           devicetoken = value.get("devicetoken");
           username = value.get('name');
-          sendchatnotification(devicetoken, username, message);
+          sendchatnotification(devicetoken, username, message, payload);
         });
       }
+
       print('user2 $user2');
     });
     print("user3");
@@ -239,7 +266,7 @@ class DatabaseService extends ChangeNotifier {
     print("sfoeiendendendend");
   }
 
-  sendchatnotification(token, username, message) async {
+  sendchatnotification(token, username, message, payload) async {
     var headers = {
       'Content-Type': 'application/json',
       'Authorization':
@@ -249,11 +276,14 @@ class DatabaseService extends ChangeNotifier {
         http.Request('POST', Uri.parse('https://fcm.googleapis.com/fcm/send'));
     request.body = json.encode({
       "registration_ids": ["$token"],
+      "data": payload,
       "notification": {
+        "image": profile,
         "body": "$message",
         "title": "$username",
         "android_channel_id": "runforrent",
-        "sound": false
+        "alert": "true",
+        "sound": "true",
       }
     });
     request.headers.addAll(headers);
@@ -265,6 +295,32 @@ class DatabaseService extends ChangeNotifier {
     } else {
       print(response.reasonPhrase);
     }
+    // var headers = {
+    //   'Content-Type': 'application/json',
+    //   'Authorization':
+    //       'key=AAAAgUaarWA:APA91bFA_mb9x7x4RiOq30zOtB60GgLzeYszCSibCuZnMfpzvBpFOziTpoy_Prw_3JeQVatC9Jxw0JgfPFtXtcOPpXgQNT2-l_ccf_2L_STiBKmOzBzMp4cbOfVTg7BAcB37D588KZlg'
+    // };
+    // var request =
+    //     http.Request('POST', Uri.parse('https://fcm.googleapis.com/fcm/send'));
+    // request.body = json.encode({
+    //   "registration_ids": ["$token"],
+    //   "data": "payload",
+    //   "notification": {
+    //     "body": "$message",
+    //     "title": "$username",
+    //     "android_channel_id": "runforrent",
+    //     "sound": "true",
+    //   }
+    // });
+    // request.headers.addAll(headers);
+
+    // http.StreamedResponse response = await request.send();
+
+    // if (response.statusCode == 200) {
+    //   print(await response.stream.bytesToString());
+    // } else {
+    //   print(response.reasonPhrase);
+    // }
     //   try {
     //     final uri = Uri.parse('https://fcm.googleapis.com/fcm/send');
     //     final headers = {

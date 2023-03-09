@@ -2,14 +2,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:take_web/web/Widgets/contact_detail.dart';
-import 'package:take_web/web/Widgets/detail_button.dart';
-import 'package:take_web/web/Widgets/detail_card.dart';
-import 'package:take_web/web/globar_variables/globals.dart' as globals;
 import '../../Widgets/Image_animation.dart';
+import '../../Widgets/contact_detail.dart';
+import '../../Widgets/detail_button.dart';
+import '../../Widgets/detail_card.dart';
 import '../../Widgets/google_map_card.dart';
 import '../../Widgets/profile_card.dart';
+import '../../globar_variables/globals.dart';
 import '../../models/user_model.dart';
+import '../list_property/flutter_flow/flutter_flow_theme.dart';
 
 class OwnersProfileProperty extends StatefulWidget {
   var list;
@@ -60,7 +61,7 @@ class _OwnersProfilePropertyState extends State<OwnersProfileProperty> {
         setState(() {
           profileimage = valuedata?.profileImage;
           valuedata?.profileImage;
-          globals.ownerprofiledata = valuedata;
+          ownerprofiledata = valuedata;
           valuedata;
         });
         print("valuedata ${valuedata?.address}");
@@ -94,7 +95,7 @@ class _OwnersProfilePropertyState extends State<OwnersProfileProperty> {
     print(widget.list["uid"]);
     return SafeArea(
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
         body: Container(
           margin: EdgeInsets.symmetric(
               vertical: 0, horizontal: width < 800 ? 10 : width * 0.24),
@@ -108,7 +109,7 @@ class _OwnersProfilePropertyState extends State<OwnersProfileProperty> {
                 // OwnerProfileCard(widget.detail, profileimage, valuedata),
                 DetailCard(widget.list),
                 ContactDetail(widget.list),
-                GoogleMapCard(widget.list)
+                GoogleMapCard(widget.list, 200.0)
               ],
             ),
           ),

@@ -6,11 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:take_web/web/Widgets/bottom_nav_bar.dart';
-import 'package:take_web/web/globar_variables/globals.dart';
-import 'package:take_web/web/pages/signup_page/phone_signup.dart';
-import 'package:take_web/web/pages/signin_page/sign_in.provider.dart';
 
+import '../list_property/flutter_flow/flutter_flow_theme.dart';
 import '../signup_page/signup_provider.dart';
 
 class OtpSignupPage extends StatefulWidget {
@@ -25,8 +22,6 @@ class _OtpSignupPageState extends State<OtpSignupPage> {
   final _codeController = TextEditingController();
   final _phoneController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -43,15 +38,16 @@ class _OtpSignupPageState extends State<OtpSignupPage> {
             child: Container(
               height: MediaQuery.of(context).size.height,
               width: MediaQuery.of(context).size.width,
-              decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                    Colors.purpleAccent,
-                    Colors.amber,
-                    Colors.blue,
-                  ])),
+              color: FlutterFlowTheme.of(context).primaryBackground,
+              // decoration: const BoxDecoration(
+              //     gradient: LinearGradient(
+              //         begin: Alignment.topLeft,
+              //         end: Alignment.bottomRight,
+              //         colors: [
+              //       Colors.purpleAccent,
+              //       Colors.amber,
+              //       Colors.blue,
+              //     ])),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
@@ -69,9 +65,16 @@ class _OtpSignupPageState extends State<OtpSignupPage> {
                   Container(
                     width: 325,
                     height: 320,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(15)),
+                    decoration: BoxDecoration(
+                      boxShadow: const [
+                        BoxShadow(
+                          blurRadius: 4,
+                          color: Color(0x32000000),
+                          offset: Offset(0, 2),
+                        )
+                      ],
+                      color: FlutterFlowTheme.of(context).secondaryBackground,
+                      borderRadius: const BorderRadius.all(Radius.circular(15)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -123,8 +126,8 @@ class _OtpSignupPageState extends State<OtpSignupPage> {
                           child: Container(
                             alignment: Alignment.center,
                             width: 262,
-                            height: 50,
-                            decoration: const BoxDecoration(
+                            height: 80,
+                            decoration: BoxDecoration(
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(8)),
                                 gradient: LinearGradient(
@@ -132,8 +135,8 @@ class _OtpSignupPageState extends State<OtpSignupPage> {
                                     end: Alignment.centerRight,
                                     colors: [
                                       // Color(0xFF8A2387),
-                                      Color.fromRGBO(242, 113, 33, 1),
-                                      Color(0xFFF27121),
+                                      FlutterFlowTheme.of(context).alternate,
+                                      FlutterFlowTheme.of(context).alternate,
                                     ])),
                             child: Padding(
                               padding: const EdgeInsets.all(12.0),

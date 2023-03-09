@@ -1,5 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:full_screen_image/full_screen_image.dart';
+import 'package:full_screen_image_null_safe/full_screen_image_null_safe.dart';
 
 class ImageAnimation extends StatefulWidget {
   var detail;
@@ -47,10 +48,17 @@ class _ImageAnimationState extends State<ImageAnimation> {
                 return FullScreenWidget(
                     child: Container(
                   margin: EdgeInsets.all(10),
-                  child: Image.network(
-                    widget.detail["propertyimage"][pagePosition],
+                  child: Image(
+                    height: 200,
                     fit: BoxFit.cover,
+                    image: CachedNetworkImageProvider(
+                      widget.detail["propertyimage"][pagePosition],
+                    ),
                   ),
+                  // child: Image.network(
+                  //   widget.detail["propertyimage"][pagePosition],
+                  //   fit: BoxFit.cover,
+                  // ),
                 ));
               }),
         ),

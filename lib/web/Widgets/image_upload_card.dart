@@ -24,9 +24,9 @@ class _ImageUploadCardState extends State<ImageUploadCard> {
         boxShadow: [
           BoxShadow(
               color: Colors.grey.shade200,
-              offset: const Offset(5, 15),
-              blurRadius: 5,
-              spreadRadius: 3)
+              // offset: const Offset(5, 15),
+              blurRadius: 0,
+              spreadRadius: 0)
         ],
         color: Colors.white,
         // color: Theme.of(context).primaryColor,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../pages/list_property/flutter_flow/flutter_flow_theme.dart';
+
 class ContactDetail extends StatelessWidget {
   var detail;
   ContactDetail(this.detail, {Key? key}) : super(key: key);
@@ -11,20 +13,16 @@ class ContactDetail extends StatelessWidget {
       width: MediaQuery.of(context).size.width,
       decoration: BoxDecoration(
         boxShadow: const [
-          BoxShadow(
-              color: Colors.grey,
-              offset: Offset(10, 15),
-              blurRadius: 15,
-              spreadRadius: 1)
+          BoxShadow(color: Colors.grey, blurRadius: 0, spreadRadius: 0)
         ],
-        color: Colors.white,
+        color: FlutterFlowTheme.of(context).secondaryBackground,
         // color: Theme.of(context).primaryColor,
-        borderRadius: BorderRadius.circular(50),
+        borderRadius: BorderRadius.circular(12),
       ),
       child: SizedBox(
         width: MediaQuery.of(context).size.width,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(38.0,18,18,18),
+          padding: const EdgeInsets.fromLTRB(38.0, 18, 18, 18),
           child: Column(
             children: [
               Row(
@@ -51,7 +49,6 @@ class ContactDetail extends StatelessWidget {
                       text: "${detail["mobilenumber"]}",
                     ),
                   ),
-
                 ],
               ),
               const SizedBox(
@@ -81,10 +78,11 @@ class ContactDetail extends StatelessWidget {
                       text: "${detail["whatsappnumber"]}",
                     ),
                   ),
-
                 ],
               ),
-              const SizedBox(height: 10,),
+              const SizedBox(
+                height: 10,
+              ),
               Row(
                 children: [
                   RichText(
@@ -109,7 +107,6 @@ class ContactDetail extends StatelessWidget {
                       text: "${detail["email"]}",
                     ),
                   ),
-
                 ],
               ),
             ],

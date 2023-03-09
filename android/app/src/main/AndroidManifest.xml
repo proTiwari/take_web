@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.take_web">
+    package="com.runforrent.take_web">
    <application
         android:label="take_web"
         android:name="${applicationName}"

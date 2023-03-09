@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:take_web/web/globar_variables/globals.dart' as globals;
+
+import '../../web1/globar_variables/globals.dart';
 class SearchBar extends StatelessWidget {
   const SearchBar({Key? key}) : super(key: key);
 
@@ -8,7 +9,7 @@ class SearchBar extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 14),
       height: 50,
-      width: globals.width,
+      width: width,
       decoration: BoxDecoration(
         boxShadow: [
           BoxShadow(

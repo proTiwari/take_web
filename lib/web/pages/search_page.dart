@@ -6,6 +6,7 @@ import 'chat/chat_page.dart';
 import '../Widgets/wedigets.dart';
 import '../helper/helper_functions.dart';
 import '../services/database_service.dart';
+import 'list_property/flutter_flow/flutter_flow_theme.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({Key? key}) : super(key: key);
@@ -191,7 +192,7 @@ class _SearchPageState extends State<SearchPage> {
           } else {
             setState(() {
               isJoined = !isJoined;
-              showSnackbar(context, Colors.red, "Left the group $groupName");
+              showSnackbar(context, FlutterFlowTheme.of(context).alternate, "Left the group $groupName");
             });
           }
         },

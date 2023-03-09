@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <script src="https://unpkg.com/canvaskit-wasm@0.33.0/bin/canvaskit.js"></script>
+  <link rel="preload" href="https://unpkg.com/canvaskit-wasm@0.33.0/bin/canvaskit.wasm" as="fetch" crossOrigin="anonymous">
   <!-- Firebase Configuration-->
   <!-- The core Firebase JS SDK is always required and must be listed first -->
+
+
   <script src="https://www.google.com/recaptcha/api.js?render=6LeNoQ0kAAAAABLPs9kb_boqhpavcX5haQAJKO14"></script>
 
     <script src="flutter.js" defer></script>
@@ -11,24 +15,32 @@
   <!-- TODO: Add SDKs for Firebase products that you want to use
       https://firebase.google.com/docs/web/setup#available-libraries -->
   <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-auth.js"></script>
-  <!-- <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-analytics.js"></script>  -->
+  <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-analytics.js"></script> 
   <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-firestore.js"></script>
   <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-storage.js"></script>
   <script src="https://www.gstatic.com/firebasejs/7.15.5/firebase-database.js"></script>
 
   <script>
+ 
     // Your web app's Firebase configuration
     var firebaseConfig = {
-      //my info
+      apiKey: "AIzaSyB8YcmJ24lcwM_V52pCu9KqcrwzgUAJPk0",
+  authDomain: "runforrent-72f1d.firebaseapp.com",
+  projectId: "runforrent-72f1d",
+  storageBucket: "runforrent-72f1d.appspot.com",
+  messagingSenderId: "555235323232",
+  appId: "1:555235323232:web:557de2dda8636e9f0d4205",
+  measurementId: "G-P3W7EWNPYY"
     };
+
     // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     // firebase.analytics();
   </script>
   <!-- End of Firebase Configuration-->
-  <script src="https://unpkg.com/canvaskit-wasm@0.33.0/bin/canvaskit.js"></script>
+  
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB8YcmJ24lcwM_V52pCu9KqcrwzgUAJPk0"></script>
-<link rel="preload" href="https://unpkg.com/canvaskit-wasm@0.33.0/bin/canvaskit.wasm" as="fetch" crossOrigin="anonymous">
+<!-- <link rel="preload" href="https://unpkg.com/canvaskit-wasm@0.33.0/bin/canvaskit.wasm" as="fetch" crossOrigin="anonymous"> -->
   <!--
     If you are serving your web app in a path other than the root, change the
     href value below to reflect the base path you are serving from.

@@ -2,15 +2,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:take_web/web/Widgets/contact_detail.dart';
-import 'package:take_web/web/Widgets/detail_button.dart';
-import 'package:take_web/web/Widgets/detail_card.dart';
-import 'package:take_web/web/globar_variables/globals.dart' as globals;
+import 'package:go_router/go_router.dart';
 import '../../Widgets/Image_animation.dart';
+import '../../Widgets/contact_detail.dart';
+import '../../Widgets/detail_button.dart';
+import '../../Widgets/detail_card.dart';
 import '../../Widgets/google_map_card.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import '../../Widgets/profile_card.dart';
+import '../../globar_variables/globals.dart';
 import '../../models/user_model.dart';
+import '../list_property/flutter_flow/flutter_flow_theme.dart';
+import '../list_property/flutter_flow/flutter_flow_util.dart';
 
 class Property extends StatefulWidget {
   var detail;
@@ -28,6 +31,7 @@ class _PropertyState extends State<Property> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    dynamiclink = '';
     //getprofilepic();
     try {
       currentUser = FirebaseAuth.instance.currentUser!.uid;
@@ -64,7 +68,7 @@ class _PropertyState extends State<Property> {
         setState(() {
           profileimage = valuedata?.profileImage;
           valuedata?.profileImage;
-          globals.ownerprofiledata = valuedata;
+          ownerprofiledata = valuedata;
           print("isjfowjeo");
           print(valuedata!.id);
           valuedata;
@@ -98,10 +102,11 @@ class _PropertyState extends State<Property> {
   Widget build(BuildContext context) {
     var width = MediaQuery.of(context).size.width;
     print(widget.detail["uid"]);
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        body: Container(
+    return Scaffold(
+      backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
+      body: Padding(
+        padding: const EdgeInsets.fromLTRB(0, 25, 0, 0),
+        child: Container(
           margin: EdgeInsets.symmetric(
               vertical: 0, horizontal: width < 800 ? 10 : width * 0.24),
           child: SingleChildScrollView(
@@ -114,18 +119,38 @@ class _PropertyState extends State<Property> {
                 OwnerProfileCard(widget.detail, profileimage, valuedata),
                 DetailCard(widget.detail),
                 ContactDetail(widget.detail),
-                GoogleMapCard(widget.detail)
+                InkWell(
+                    onTap: () {
+                      print("clicked");
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                GoogleMapCard(widget.detail, 200.0)),
+                      );
+                    },
+                    child: Container(
+                      color: Color.fromARGB(255, 255, 255, 255),
+                      child: Stack(children: [
+                        GoogleMapCard(widget.detail, 200.0),
+                        Container(
+                          color: Colors.transparent,
+                          height: 200,
+                          width: 400,
+                        )
+                      ]),
+                    ))
               ],
             ),
           ),
         ),
-        bottomNavigationBar: currentUser == widget.detail["uid"]
-            ? const SizedBox()
-            : Padding(
-                padding: const EdgeInsets.all(6.0),
-                child: DetailButton(widget.detail, currentUser, profileimage),
-              ),
       ),
+      bottomNavigationBar: currentUser == widget.detail["uid"]
+          ? const SizedBox()
+          : Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: DetailButton(widget.detail, currentUser, profileimage),
+            ),
     );
   }
 }

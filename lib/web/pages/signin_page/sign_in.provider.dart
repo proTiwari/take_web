@@ -2,12 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
-import 'package:take_web/web/pages/signin_page/otp_verification_login.dart';
-import 'package:take_web/web/pages/signup_page/phone_signup.dart';
-import 'package:take_web/web/pages/splashscreen.dart';
-import 'package:take_web/web/providers/base_providers.dart';
-import '../../Widgets/bottom_nav_bar.dart';
+import 'package:go_router/go_router.dart';
 import '../../firebase_functions/firebase_fun.dart';
+import '../../providers/base_providers.dart';
+import '../signup_page/phone_signup.dart';
+import 'otp_verification_login.dart';
 
 class SigninModel {
   final String value;
@@ -94,11 +93,8 @@ class SigninProvider extends BaseProvider implements LoaderState {
         await getUser();
         loading = false;
         notifyListeners();
-        Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-                builder: (BuildContext context) => SplashScreen()),
-            ModalRoute.withName('/'));
+        context.pushNamed('splashscreen');
+       
       } else {
 /*        print("Error");
         showToast(context: context,"something went wrong");

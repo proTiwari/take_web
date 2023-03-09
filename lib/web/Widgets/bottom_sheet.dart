@@ -32,9 +32,9 @@ class _BottomSheetImageState extends State<BottomSheetImage> {
               },
               label: const Text("Camera"),
             ),
-            SizedBox(
-              width: MediaQuery.of(context).size.width * 0.3,
-            ),
+            // SizedBox(
+            //   width: MediaQuery.of(context).size.width * 0.3,
+            // ),
             TextButton.icon(
               icon: const Icon(
                 Icons.image,

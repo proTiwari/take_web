@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../pages/list_property/flutter_flow/flutter_flow_theme.dart';
+
 class SmallCard extends StatelessWidget {
   final String city;
   const SmallCard(this.city, {Key? key}) : super(key: key);
@@ -21,7 +23,7 @@ class SmallCard extends StatelessWidget {
         //       blurRadius: 5,
         //       spreadRadius: 3)
         // ],
-        color: Colors.grey.shade200,
+        color: FlutterFlowTheme.of(context).primaryBackground,
         // color: Theme.of(context).primaryColor,
         borderRadius: BorderRadius.circular(8),
       ),

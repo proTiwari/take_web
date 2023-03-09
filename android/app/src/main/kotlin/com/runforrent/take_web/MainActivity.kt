@@ -1,4 +1,4 @@
-package com.example.take_web
+package com.runforrent.take_web
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -2,8 +2,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:take_web/web/pages/signup_page/phone_signup.dart';
 import 'package:take_web/web/pages/signin_page/sign_in.provider.dart';
+
+import '../list_property/flutter_flow/flutter_flow_theme.dart';
 
 class OtpLoginPage extends StatefulWidget {
   String verificationId;
@@ -15,7 +16,6 @@ class OtpLoginPage extends StatefulWidget {
 
 class _OtpLoginPageState extends State<OtpLoginPage> {
   static final _codeController = TextEditingController();
-
 
   @override
   Widget build(BuildContext context) {
@@ -32,15 +32,16 @@ class _OtpLoginPageState extends State<OtpLoginPage> {
             child: Container(
               height: MediaQuery.of(context).size.height,
               width: MediaQuery.of(context).size.width,
-              decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                    Colors.purpleAccent,
-                    Colors.amber,
-                    Colors.blue,
-                  ])),
+              color: FlutterFlowTheme.of(context).primaryBackground,
+              // decoration: const BoxDecoration(
+              //     gradient: LinearGradient(
+              //         begin: Alignment.topLeft,
+              //         end: Alignment.bottomRight,
+              //         colors: [
+              //       Colors.purpleAccent,
+              //       Colors.amber,
+              //       Colors.blue,
+              //     ])),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
@@ -58,8 +59,15 @@ class _OtpLoginPageState extends State<OtpLoginPage> {
                   Container(
                     width: 325,
                     height: 320,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                    decoration: BoxDecoration(
+                      boxShadow: const [
+                        BoxShadow(
+                          blurRadius: 4,
+                          color: Color(0x32000000),
+                          offset: Offset(0, 2),
+                        )
+                      ],
+                      color: FlutterFlowTheme.of(context).secondaryBackground,
                       borderRadius: BorderRadius.all(Radius.circular(15)),
                     ),
                     child: Column(
@@ -88,7 +96,7 @@ class _OtpLoginPageState extends State<OtpLoginPage> {
                         ),
                         SizedBox(
                           width: 260,
-                          height: 60,
+                          height: 80,
                           child: TextField(
                             maxLength: 6,
                             controller: _codeController,
@@ -114,7 +122,7 @@ class _OtpLoginPageState extends State<OtpLoginPage> {
                             alignment: Alignment.center,
                             width: 262,
                             height: 50,
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(8)),
                                 gradient: LinearGradient(
@@ -122,8 +130,8 @@ class _OtpLoginPageState extends State<OtpLoginPage> {
                                     end: Alignment.centerRight,
                                     colors: [
                                       // Color(0xFF8A2387),
-                                      Color.fromRGBO(242, 113, 33, 1),
-                                      Color(0xFFF27121),
+                                      FlutterFlowTheme.of(context).alternate,
+                                      FlutterFlowTheme.of(context).alternate,
                                     ])),
                             child: Padding(
                               padding: const EdgeInsets.all(12.0),

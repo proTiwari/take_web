@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:take_web/web/Widgets/bottom_nav_bar.dart';
-import 'package:take_web/web/globar_variables/globals.dart' as globals;
+import '../../web1/globar_variables/globals.dart';
 import '../firebase_functions/firebase_fun.dart';
+import '../globar_variables/globals.dart';
 import '../pages/explore_page/googlemap.dart';
+import 'bottom_nav_bar.dart';
 
 class ParallelDropDownList extends StatefulWidget {
   Future<List>? stateCity;
@@ -27,7 +28,7 @@ class _ParallelDropDownListState extends State<ParallelDropDownList> {
   @override
   void initState() {
     super.initState();
-    value = globals.list;
+    value = 'list';
     state = value[1];
     citys = value[0];
   }
@@ -120,7 +121,7 @@ class _ParallelDropDownListState extends State<ParallelDropDownList> {
                       itemBuilder: (BuildContext context, int index) {
                         return InkWell(
                           onTap: () async {
-                            globals.city = city[index];
+                            city = city[index];
                             // getproperty(city[index]);
                             var namecity = city[index].toString();
                             String result = namecity.replaceAll('ā', 'a');
@@ -128,8 +129,8 @@ class _ParallelDropDownListState extends State<ParallelDropDownList> {
                             result = result.replaceAll('ū', 'u');
                             var finalcity = result.replaceAll('ī', 'i');
                             print("hhhhhhhhhhhhh${finalcity}");
-                            globals.city = finalcity;
-                            globals.secondcall = true;
+                            city = finalcity as List;
+                            secondcall = true;
                             // ignore: use_build_context_synchronously
                             if (widget.page == "search") {
                               Navigator.pushAndRemoveUntil<void>(

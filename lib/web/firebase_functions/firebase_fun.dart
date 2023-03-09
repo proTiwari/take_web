@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/change_notifier.dart';
-import 'package:take_web/web/Widgets/bottom_nav_bar.dart';
-import 'package:take_web/web/globar_variables/globals.dart' as globals;
+import '../globar_variables/globals.dart';
 import '../models/property_model.dart';
 import '../models/user_model.dart';
 import 'package:georange/georange.dart';
@@ -215,32 +215,15 @@ void listProperty({
     print(e);
   }
 
-  if (profileImage == null || profileImage == '') {
-    try {
-      await FirebaseFirestore.instance
-          .collection("Controllers")
-          .doc("variables")
-          .get()
-          .then((value) {
-        profileImage = value.data()!["defaultprofileImage"];
-      });
-    } catch (e) {
-      print(e);
-    }
-  }
-
-  if (profileImage == null || profileImage == '') {
-    profileImage =
-        "https://cdn.pixabay.com/photo/2021/06/07/13/45/user-6318003__340.png";
-  }
   GeoRange georange = GeoRange();
-  var geohash = georange.encode(globals.latlong.latitude, globals.latlong.longitude);
+  var geohash =
+      georange.encode(latlong.latitude, latlong.longitude);
 
   try {
     await FirebaseFirestore.instance.collection("City").doc(propertyId).set({
       'uid': _auth.currentUser!.uid,
       'date': DateTime.now(),
-      'geohash':geohash,
+      'geohash': geohash,
       'profileImage': profileImage,
       'propertyId': propertyId,
       'state': state,
@@ -264,8 +247,8 @@ void listProperty({
       'sharing': sharing,
       'foodservice': foodservice,
       'paymentduration': paymentduration,
-      'lat': globals.latlong.latitude,
-      'lon': globals.latlong.longitude,
+      'lat': latlong.latitude,
+      'lon': latlong.longitude,
     }).whenComplete(() async {
       try {
         try {
@@ -297,24 +280,20 @@ void listProperty({
 }
 
 getUser() async {
-  var data;
-  if (_auth.currentUser != null) {
-    print(
-        "lllllllllllllll${_auth.currentUser!.email}llllllllllllllllllllllll${_auth.currentUser!.uid}");
-
-    data = await FirebaseFirestore.instance
+  try {
+    await FirebaseFirestore.instance
         .collection("Users")
         .doc(_auth.currentUser!.uid)
         .get()
         .then((value) => {
-              // print(value.get("name")),
-              globals.userdata = value,
-            })
-        .whenComplete(() => {
-              print("completed${globals.userdata}"),
+              userdata = value,
             });
-    // print("globals userdata : ${globals.userdata["name"]}");
+  } catch (e) {
+    if (kDebugMode) {
+      print("getuser error: ${e.toString()}");
+    }
   }
+  return;
 }
 
 // getproperty(city) async {

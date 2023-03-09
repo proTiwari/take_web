@@ -8,13 +8,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
-import 'package:take_web/web/pages/splashscreen.dart';
-import 'package:take_web/web/providers/base_providers.dart';
 import 'package:http/http.dart' as http;
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:take_web/web/globar_variables/globals.dart' as globals;
-
+import '../../globar_variables/globals.dart' as globals;
 import '../../firebase_functions/firebase_fun.dart';
+import '../../providers/base_providers.dart';
+import '../splashscreen.dart';
 
 class ValidatorType {
   static final RegExp email = RegExp(
@@ -58,11 +57,10 @@ class ListProvider extends BaseProvider {
   var sharinglist = [
     'Number of sharing?',
     'No sharing',
-    'No limits',
     'Two sharing',
     'Three sharing',
-    'Family',
-    'Many sharing',
+    'Above Three',
+    'No limits',
     'Will be discussed',
   ];
 
@@ -192,8 +190,6 @@ class ListProvider extends BaseProvider {
     uploadimagelist;
     notifyListeners();
   }
-
-  
 
   void changecity(String value) {
     if (value == "" || value == "*City" || value == "null") {
@@ -978,7 +974,7 @@ class ListProvider extends BaseProvider {
       result = result.replaceAll('Ā', 'A');
       result = result.replaceAll('ū', 'u');
       var finalcity = result.replaceAll('ī', 'i');
-       
+
       listProperty(
         propertyId: generateRandomString(74),
         state: state.value,

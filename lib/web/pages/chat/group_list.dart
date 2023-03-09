@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../../services/char_services.dart';
 import '../../services/database_service.dart';
+import '../list_property/flutter_flow/flutter_flow_theme.dart';
 import 'group_tile.dart';
 
 class GroupListPage extends StatefulWidget {
@@ -95,7 +96,7 @@ class _GroupListPageState extends State<GroupListPage> {
         centerTitle: true,
         elevation: 0,
         title: const Text("chats", style: TextStyle(color: Colors.black)),
-        backgroundColor: Colors.white,
+        backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
       ),
       body: groupList(),
     );
@@ -182,84 +183,102 @@ class _GroupListPageState extends State<GroupListPage> {
 
   getprofile(groupId) async {
     print("oifjoiejf");
-    await FirebaseFirestore.instance
-        .collection("groups")
-        .doc(groupId)
-        .get()
-        .then((value) {
-      var list = value.get("members");
-      print(list);
-      for (var i in list) {
-        if (i != FirebaseAuth.instance.currentUser!.uid) {
-          FirebaseFirestore.instance
-              .collection("Users")
-              .doc(i)
-              .get()
-              .then((value) {
-            String profileimage = value.get("profileImage");
-            print("this is profile image: ${profileimage}");
-            return profileimage;
-          });
+    try {
+      await FirebaseFirestore.instance
+          .collection("groups")
+          .doc(groupId)
+          .get()
+          .then((value) {
+        var list = value.get("members");
+        print(list);
+        for (var i in list) {
+          if (i != FirebaseAuth.instance.currentUser!.uid) {
+            try {
+              FirebaseFirestore.instance
+                  .collection("Users")
+                  .doc(i)
+                  .get()
+                  .then((value) {
+                String profileimage = value.get("profileImage");
+                print("this is profile image: ${profileimage}");
+                return profileimage;
+              });
+            } catch (e) {
+              print("error In group list:: $e");
+            }
+          }
         }
-      }
-    });
+      });
+    } catch (e) {
+      print("group_list:: $e");
+    }
   }
 
   groupList() {
     //FirebaseFirestore.instance.collection("Users").doc(FirebaseAuth.instance.currentUser!.uid).snapshots()
     try {
       var width = MediaQuery.of(context).size.width;
-      return StreamBuilder(
-        stream: FirebaseFirestore.instance
-            .collection("Users")
-            .doc(FirebaseAuth.instance.currentUser!.uid)
-            .snapshots(),
-        builder: (context, AsyncSnapshot snapshot) {
-          try {
-            // print("sdfsdfsddewreww${snapshot.data["groups"]}");
-            // make some checks
+      return Container(
+        color: FlutterFlowTheme.of(context).secondaryBackground,
+        height: MediaQuery.of(context).size.height,
+        child: StreamBuilder(
+          stream: FirebaseFirestore.instance
+              .collection("Users")
+              .doc(FirebaseAuth.instance.currentUser!.uid)
+              .snapshots(),
+          builder: (context, AsyncSnapshot snapshot) {
+            try {
+              // print("sdfsdfsddewreww${snapshot.data["groups"]}");
+              // make some checks
 
-            if (snapshot.hasData) {
-              if (snapshot.data['groups'] != null) {
-                if (snapshot.data['groups'].length != 0) {
-                  return ListView.builder(
-                    itemCount: snapshot.data['groups'].length,
-                    itemBuilder: (context, index) {
-                      int reverseIndex =
-                          snapshot.data['groups'].length - index - 1;
-                      // return Text(getId(snapshot.data['groups'][reverseIndex]));}
-                      var profileimage =
-                          getprofile(snapshot.data['groups'][reverseIndex]);
-                      return Container(
-                        margin: EdgeInsets.symmetric(
-                            vertical: 0,
-                            horizontal: width < 800 ? 10 : width * 0.24),
-                        child: GroupTile(
-                            profileimage: 'profileimage',
-                            groupId:
-                                getId(snapshot.data['groups'][reverseIndex]),
-                            groupName:
-                                getName(snapshot.data['groups'][reverseIndex]),
-                            userName: snapshot.data['id']),
+              if (snapshot.hasData) {
+                if (snapshot.data['groups'] != null) {
+                  if (snapshot.data['groups'].length != 0) {
+                    try {
+                      return ListView.builder(
+                        itemCount: snapshot.data['groups'].length,
+                        itemBuilder: (context, index) {
+                          print(
+                              "7777777777777: ${snapshot.data['groups'][index]}");
+                          // return Text(getId(snapshot.data['groups'][reverseIndex]));}
+                          // var profileimage =
+                          //     getprofile(snapshot.data['groups'][reverseIndex]);
+                          return Container(
+                            color: FlutterFlowTheme.of(context)
+                                .secondaryBackground,
+                            margin: EdgeInsets.symmetric(
+                                vertical: 0,
+                                horizontal: width < 800 ? 10 : width * 0.24),
+                            child: GroupTile(
+                                profileimage: 'profileimage',
+                                groupId: getId(
+                                    snapshot.data['groups'][index]),
+                                groupName: getName(
+                                    snapshot.data['groups'][index]),
+                                userName: snapshot.data['id']),
+                          );
+                        },
                       );
-                    },
-                  );
+                    } catch (e) {
+                      return Container();
+                    }
+                  } else {
+                    return noGroupWidget();
+                  }
                 } else {
                   return noGroupWidget();
                 }
               } else {
-                return noGroupWidget();
+                return Center(
+                  child: CircularProgressIndicator(
+                      color: Theme.of(context).primaryColor),
+                );
               }
-            } else {
-              return Center(
-                child: CircularProgressIndicator(
-                    color: Theme.of(context).primaryColor),
-              );
+            } catch (e) {
+              return noGroupWidget();
             }
-          } catch (e) {
-            return noGroupWidget();
-          }
-        },
+          },
+        ),
       );
     } catch (e) {
       return const Center(child: CircularProgressIndicator());

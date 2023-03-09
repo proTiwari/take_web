@@ -1,12 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
-import 'package:take_web/web/globar_variables/globals.dart';
-import 'package:take_web/web/pages/signin_page/phone_login.dart';
+import '../globar_variables/globals.dart';
 import '../pages/chat/chat_page.dart';
+import '../pages/list_property/flutter_flow/flutter_flow_theme.dart';
+import '../pages/list_property/flutter_flow/flutter_flow_util.dart';
+import '../pages/nav/nav.dart';
+import '../pages/nav/serialization_util.dart';
+import '../pages/signin_page/phone_login.dart';
 import '../services/database_service.dart';
-import '../../web/globar_variables/globals.dart' as globals;
 
 class DetailButton extends StatefulWidget {
   var detail;
@@ -22,7 +26,7 @@ class DetailButton extends StatefulWidget {
 
 class _DetailButtonState extends State<DetailButton> {
   var groupid;
-  bool groupexist = true;
+  bool groupexist = false;
   bool loading = false;
   @override
   void initState() {
@@ -34,7 +38,7 @@ class _DetailButtonState extends State<DetailButton> {
   @override
   Widget build(BuildContext context) {
     var width = MediaQuery.of(context).size.width;
-    print("group id ${groupid.groupid}");
+
     return InkWell(
       onTap: () async {
         if (widget.currentUser != '') {
@@ -42,6 +46,8 @@ class _DetailButtonState extends State<DetailButton> {
             loading = true;
           });
           print("start");
+          var listproperties = [];
+          Map groupidmap = {};
           try {
             widget.detail['propertyId'];
             var listofgroups = await FirebaseFirestore.instance
@@ -50,46 +56,32 @@ class _DetailButtonState extends State<DetailButton> {
                 .get();
             var grouplist = listofgroups.data()!['groups'];
             var count = 0;
+            print("jjjjj: ${grouplist}");
             for (var i in grouplist) {
               i = i.toString().split("_")[0];
               await FirebaseFirestore.instance
                   .collection("groups")
                   .doc(i)
                   .get()
-                  .then((value) => {
-                        if (value.data()!['propertyId'] ==
-                            widget.detail["propertyId"])
-                          {
-                            print(
-                                "moving to chat page ${widget.detail["ownername"]}"),
-                            setState(() {
-                              loading = false;
-                            }),
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ChatPage(
-                                  groupId: value.data()!['groupId'],
-                                  groupName: "${widget.detail["ownername"]}",
-                                  userName: "${globals.userdata['name']}",
-                                  profileImage: widget.detail['profileImage'],
-                                  owneruid: widget.detail['uid'],
-                                ),
-                              ),
-                            )
-                          }
-                        else
-                          {count += 1}
-                      });
-              print(count);
-              print(grouplist.length);
+                  .then((value) {
+                try {
+                  print("printing ff: ${value.data()?.entries}");
+                  listproperties.add(value.data()?['propertyId']);
+                  groupidmap[value.data()?['propertyId']] =
+                      value.data()?['groupId'];
+                } catch (e) {
+                  print("error::::  ${i} ${e}");
+                }
+              });
             }
-            if (count == grouplist.length) {
-              groupexist = false;
-            }
+            groupexist = listproperties.contains(widget.detail["propertyId"]);
+            print(groupexist);
 
-            print(grouplist);
+            print("grouplist${grouplist}");
           } catch (e) {
+            setState(() {
+              loading = false;
+            });
             groupexist = false;
             print("this is the error: ${e.toString()}");
           }
@@ -101,6 +93,22 @@ class _DetailButtonState extends State<DetailButton> {
             setState(() {
               loading = false;
             });
+          } else {
+            setState(() {
+              loading = false;
+            });
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ChatPage(
+                  groupId: groupidmap[widget.detail["propertyId"]],
+                  groupName: "${widget.detail["ownername"]}",
+                  userName: "${userdata['name']}",
+                  profileImage: widget.detail['profileImage'],
+                  owneruid: widget.detail['uid'],
+                ),
+              ),
+            );
           }
         } else {
           showDialog(
@@ -111,7 +119,30 @@ class _DetailButtonState extends State<DetailButton> {
                 actions: <Widget>[
                   TextButton(
                     onPressed: () async {
-                      Navigator.pop(context, 'Okay');
+                      context.pushNamed(
+                        'customnav',
+                        queryParams: {
+                          'city': serializeParam(
+                            '${city}',
+                            ParamType.String,
+                          ),
+                          'secondcall': serializeParam(
+                            'login',
+                            ParamType.String,
+                          ),
+                          'profile': serializeParam(
+                            'Prayagraj',
+                            ParamType.String,
+                          )
+                        }.withoutNulls,
+                        extra: <String, dynamic>{
+                          kTransitionInfoKey: const TransitionInfo(
+                            hasTransition: true,
+                            transitionType: PageTransitionType.rightToLeft,
+                            duration: Duration(milliseconds: 600),
+                          ),
+                        },
+                      );
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(builder: (context) => LoginApp()),
@@ -138,7 +169,7 @@ class _DetailButtonState extends State<DetailButton> {
             //     blurRadius: 5,
             //     spreadRadius: 3)
           ],
-          color: const Color(0xFFF27121),
+          color: FlutterFlowTheme.of(context).alternate,
           // color: Theme.of(context).primaryColor,
           borderRadius: BorderRadius.circular(8),
         ),

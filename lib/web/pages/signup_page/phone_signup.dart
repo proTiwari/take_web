@@ -3,9 +3,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:take_web/web/pages/signin_page/phone_login.dart';
-import 'package:take_web/web/pages/signin_page/sign_in.provider.dart';
-import 'package:take_web/web/pages/signup_page/signup_provider.dart';
+
+import '../list_property/flutter_flow/flutter_flow_theme.dart';
+import '../signin_page/phone_login.dart';
+import 'signup_provider.dart';
 
 class SignUpPage extends StatefulWidget {
   var verificationId;
@@ -28,8 +29,6 @@ class _SignUpPageState extends State<SignUpPage> {
       r'^(([^<>()[\]\\.,;:\s@\”]+(\.[^<>()[\]\\.,;:\s@\”]+)*)|(\”.+\”))@((\[[0–9]{1,3}\.[0–9]{1,3}\.[0–9]{1,3}\.[0–9]{1,3}\])|(([a-zA-Z\-0–9]+\.)+[a-zA-Z]{2,}))$');
   final _codeController = TextEditingController();
 
- 
-
   @override
   Widget build(BuildContext context) {
     TextStyle defaultStyle =
@@ -43,15 +42,16 @@ class _SignUpPageState extends State<SignUpPage> {
             child: Container(
               height: MediaQuery.of(context).size.height,
               width: MediaQuery.of(context).size.width,
-              decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                    Colors.purpleAccent,
-                    Colors.amber,
-                    Colors.blue,
-                  ])),
+              color: FlutterFlowTheme.of(context).primaryBackground,
+              // decoration: const BoxDecoration(
+              //     gradient: LinearGradient(
+              //         begin: Alignment.topLeft,
+              //         end: Alignment.bottomRight,
+              //         colors: [
+              //       Colors.purpleAccent,
+              //       Colors.amber,
+              //       Colors.blue,
+              //     ])),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
@@ -69,8 +69,15 @@ class _SignUpPageState extends State<SignUpPage> {
                   Container(
                     width: 325,
                     height: 470,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
+                    decoration: BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          blurRadius: 4,
+                          color: Color(0x32000000),
+                          offset: Offset(0, 2),
+                        )
+                      ],
+                      color: FlutterFlowTheme.of(context).secondaryBackground,
                       borderRadius: BorderRadius.all(Radius.circular(15)),
                     ),
                     child: Form(
@@ -209,16 +216,16 @@ class _SignUpPageState extends State<SignUpPage> {
                               alignment: Alignment.center,
                               width: 262,
                               height: 50,
-                              decoration: const BoxDecoration(
+                              decoration: BoxDecoration(
                                   borderRadius:
-                                      BorderRadius.all(Radius.circular(8)),
+                                      const BorderRadius.all(Radius.circular(8)),
                                   gradient: LinearGradient(
                                       begin: Alignment.centerLeft,
                                       end: Alignment.centerRight,
                                       colors: [
                                         // Color(0xFF8A2387),
-                                        Color(0xFFF27121),
-                                        Color(0xFFF27121),
+                                        FlutterFlowTheme.of(context).alternate,
+                                        FlutterFlowTheme.of(context).alternate,
                                       ])),
                               child: Padding(
                                 padding: const EdgeInsets.all(12.0),

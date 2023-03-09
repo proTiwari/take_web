@@ -7,9 +7,11 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:take_web/web/Widgets/bottom_nav_bar.dart';
 import 'package:take_web/web/models/user_model.dart';
 import 'package:take_web/web/pages/list_property/agreement_document.dart';
+import 'package:take_web/web/pages/list_property/flutter_flow/internationalization.dart';
 import 'package:take_web/web/pages/responsive_layout.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' as riverpod;
 import 'package:take_web/web/pages/signin_page/phone_login.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:take_web/web/pages/signin_page/sign_in.provider.dart';
 import 'package:take_web/web/pages/signup_page/signup_provider.dart';
 import 'package:take_web/web/pages/splashscreen.dart';
@@ -17,13 +19,18 @@ import 'package:take_web/web/providers/base_providers.dart';
 import 'package:take_web/web/services/database_service.dart';
 import 'package:take_web/web/firebase_functions/firebase_fun.dart';
 
+import 'web/pages/nav/nav.dart';
+
 void main() async {
   Provider.debugCheckInvalidValueType = null;
    WidgetsFlutterBinding.ensureInitialized();
   if(kIsWeb){
     bool ready = await GRecaptchaV3.ready("6LeNoQ0kAAAAABLPs9kb_boqhpavcX5haQAJKO14"); //--2 //6LeNoQ0kAAAAABLPs9kb_boqhpavcX5haQAJKO14
     print("Is Recaptcha ready? $ready");
+    GRecaptchaV3.hideBadge();
   }
+  
+  
   await Firebase.initializeApp(
     options: const FirebaseOptions(
         apiKey: "AIzaSyB8YcmJ24lcwM_V52pCu9KqcrwzgUAJPk0",
@@ -46,6 +53,18 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   FirebaseAuth auth = FirebaseAuth.instance;
+   Locale? _locale;
+  ThemeMode _themeMode = ThemeMode.system;
+
+  late AppStateNotifier _appStateNotifier;
+  late GoRouter _router;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _appStateNotifier = AppStateNotifier();
+    _router = createRouter(_appStateNotifier);
+  }
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -60,48 +79,51 @@ class _MyAppState extends State<MyApp> {
           initialData: null,
         ),
       ],
-      child: MaterialApp(
+      child: MaterialApp.router(
+        localizationsDelegates: [
+          FFLocalizationsDelegate(),
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        locale: _locale,
+        supportedLocales: const [Locale('en', '')],
+        theme: ThemeData(brightness: Brightness.light),
+        routeInformationParser: _router.routeInformationParser,
+        routerDelegate: _router.routerDelegate,
         // initialRoute: '/',
         // routes: {
         //   '/':(context) =>  auth.currentUser == null ? LoginApp(): const SplashScreen(),
         // },
-        routes: {
-          '/policy': (context) => AgreementDocument(),
-        },
-        home: StreamBuilder(
-          stream: FirebaseAuth.instance.authStateChanges(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.active) {
-              // Checking if the snapshot has any data or not
-              if (snapshot.hasData) {
-                // if snapshot has data which means user is logged in then we check the width of screen and accordingly display the screen layout
-                return const ResponsiveLayout(
-                  mobileScreenLayout: SplashScreen(),
-                  webScreenLayout: SplashScreen(),
-                );
-              } else if (snapshot.hasError) {
-                return Center(
-                  child: Text('${snapshot.error}'),
-                );
-              }
-            }
+        // home: StreamBuilder(
+        //   stream: FirebaseAuth.instance.authStateChanges(),
+        //   builder: (context, snapshot) {
+        //     if (snapshot.connectionState == ConnectionState.active) {
+        //       // Checking if the snapshot has any data or not
+        //       if (snapshot.hasData) {
+        //         // if snapshot has data which means user is logged in then we check the width of screen and accordingly display the screen layout
+        //         return const ResponsiveLayout(
+        //           mobileScreenLayout: SplashScreen(),
+        //           webScreenLayout: SplashScreen(),
+        //         );
+        //       } else if (snapshot.hasError) {
+        //         return Center(
+        //           child: Text('${snapshot.error}'),
+        //         );
+        //       }
+        //     }
 
-            // means connection to future hasnt been made yet
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
+        //     // means connection to future hasnt been made yet
+        //     if (snapshot.connectionState == ConnectionState.waiting) {
+        //       return const Center(
+        //         child: CircularProgressIndicator(),
+        //       );
+        //     }
 
-            return const SplashScreen();
-          },
-        ),
+        //     return const SplashScreen();
+        //   },
+        // ),
         title: '',
-        theme: ThemeData(
-          //#FC7676
-          // visualDensity: VisualDensity.adaptivePlatformDensity,
-          primaryColor: const Color(0xFFF27121),
-        ),
         debugShowCheckedModeBanner: false,
       ),
     );

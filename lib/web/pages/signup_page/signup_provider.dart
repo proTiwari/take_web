@@ -1,18 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_styled_toast/flutter_styled_toast.dart';
-import 'package:take_web/web/globar_variables/globals.dart' as globals;
-import 'package:take_web/web/pages/signup_page/otp_verification_signup.dart';
-import 'package:take_web/web/pages/splashscreen.dart';
-
-import '../../Widgets/bottom_nav_bar.dart';
 import '../../firebase_functions/firebase_fun.dart';
+import '../../globar_variables/globals.dart';
 import '../../models/property_model.dart';
 import '../../providers/base_providers.dart';
-import '../signin_page/phone_login.dart';
-import 'SignupApi.dart';
+import '../splashscreen.dart';
+import 'otp_verification_signup.dart';
 
 class SignupModel {
   String value;
@@ -44,7 +39,7 @@ class SignupProvider extends BaseProvider implements LoaderState {
   getProperties() async {
     try {
       print("ffff");
-      var data = globals.userdata['properties'];
+      var data = userdata['properties'];
       print("jjjj");
 
       for (var i in data) {
@@ -92,8 +87,8 @@ class SignupProvider extends BaseProvider implements LoaderState {
 
       print("valuabledata${valuedata[0].propertyimage}");
 
-      globals.listofproperties = valuedata;
-      valuedata = globals.listofproperties;
+      listofproperties = valuedata;
+      valuedata = listofproperties;
       valuedata;
       notifyListeners();
     } catch (e) {
@@ -168,7 +163,7 @@ class SignupProvider extends BaseProvider implements LoaderState {
           "email": email,
           "phone": phone,
           "groups": [],
-          'devicetoken': globals.devicetoken,
+          'devicetoken': devicetoken,
           "id": uid
         });
         // var data = await SignupApi().signuprequest(name.value, email.value, phone.value, uid);

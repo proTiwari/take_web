@@ -9,7 +9,7 @@ class LocalNotificationService {
     // initializationSettings  for Android
     const InitializationSettings initializationSettings =
         InitializationSettings(
-      android: AndroidInitializationSettings("@mipmap/ic_launcher"),
+      android: AndroidInitializationSettings("assets/white_back_black_front.png"),
     );
 
     _notificationsPlugin.initialize(
@@ -39,10 +39,10 @@ class LocalNotificationService {
       print("sddsd2");
       const NotificationDetails notificationDetails = NotificationDetails(
         android: AndroidNotificationDetails(
-          icon: "noticon",
+          icon: "ic_launcher",
           "pushnotificationapp",
           "runforrent",
-          importance: Importance.max,
+          importance: Importance.high,
           priority: Priority.high,
         ),
       );
@@ -53,7 +53,7 @@ class LocalNotificationService {
         message.notification!.title,
         message.notification!.body,
         notificationDetails,
-        payload: message.data['_id'],
+        payload: message.data['ownerId'],
       );
       print("sddsd4");
     } on Exception catch (e) {
