@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:take_web/web/Widgets/bottom_nav_bar.dart';
 import 'package:take_web/web/models/user_model.dart';
+import 'package:take_web/web/pages/app_state.dart';
 import 'package:take_web/web/pages/list_property/agreement_document.dart';
 import 'package:take_web/web/pages/list_property/flutter_flow/internationalization.dart';
 import 'package:take_web/web/pages/responsive_layout.dart';
@@ -23,14 +24,14 @@ import 'web/pages/nav/nav.dart';
 
 void main() async {
   Provider.debugCheckInvalidValueType = null;
-   WidgetsFlutterBinding.ensureInitialized();
-  if(kIsWeb){
-    bool ready = await GRecaptchaV3.ready("6LeNoQ0kAAAAABLPs9kb_boqhpavcX5haQAJKO14"); //--2 //6LeNoQ0kAAAAABLPs9kb_boqhpavcX5haQAJKO14
+  WidgetsFlutterBinding.ensureInitialized();
+  if (kIsWeb) {
+    bool ready = await GRecaptchaV3.ready(
+        "6LeNoQ0kAAAAABLPs9kb_boqhpavcX5haQAJKO14"); //--2 //6LeNoQ0kAAAAABLPs9kb_boqhpavcX5haQAJKO14
     print("Is Recaptcha ready? $ready");
     GRecaptchaV3.hideBadge();
   }
-  
-  
+
   await Firebase.initializeApp(
     options: const FirebaseOptions(
         apiKey: "AIzaSyB8YcmJ24lcwM_V52pCu9KqcrwzgUAJPk0",
@@ -41,8 +42,15 @@ void main() async {
         appId: "1:555235323232:web:557de2dda8636e9f0d4205",
         measurementId: "G-P3W7EWNPYY"),
   );
-  
+
   runApp(const riverpod.ProviderScope(child: MyApp()));
+
+  final appState = FFAppState(); // Initialize FFAppState
+
+  runApp(ChangeNotifierProvider(
+    create: (context) => appState,
+    child: const riverpod.ProviderScope(child: MyApp()),
+  ));
 }
 
 class MyApp extends StatefulWidget {
@@ -53,7 +61,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   FirebaseAuth auth = FirebaseAuth.instance;
-   Locale? _locale;
+  Locale? _locale;
   ThemeMode _themeMode = ThemeMode.system;
 
   late AppStateNotifier _appStateNotifier;
@@ -65,6 +73,7 @@ class _MyAppState extends State<MyApp> {
     _appStateNotifier = AppStateNotifier();
     _router = createRouter(_appStateNotifier);
   }
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(

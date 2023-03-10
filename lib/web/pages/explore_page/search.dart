@@ -371,258 +371,283 @@ class _SearchState extends river.ConsumerState<Search> {
                       const SizedBox(
                         height: 10,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 0, 15, 0),
-                        child: Align(
-                          alignment: AlignmentDirectional.topEnd,
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  SingleChildScrollView(
-                                    scrollDirection: Axis.horizontal,
+                      Container(
+                        height: 70,
+                        child: Padding(
+                          padding: MediaQuery.of(context).size.width > 900
+                              ? MediaQuery.of(context).size.width > 1400
+                                  ? const EdgeInsets.fromLTRB(
+                                      415.35, 0, 415.35, 0)
+                                  : const EdgeInsets.fromLTRB(
+                                      255.35, 0, 255.35, 0)
+                              : const EdgeInsets.fromLTRB(35, 0, 35, 0),
+                          child: Container(
+                            width: 10,
+                            child: Row(children: [
+                              Expanded(
+                                child: GestureDetector(
+                                  onTap: () {
+                                    print("clicked google map button");
+                                    if (initList.isEmpty) {
+                                      initList = initListWithoutLocation;
+                                    }
+                                    if (initList.isNotEmpty ||
+                                        initListWithoutLocation.isNotEmpty) {
+                                      selectedUserList!.isNotEmpty
+                                          ? Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder:
+                                                    (BuildContext context) =>
+                                                        Googlemap(
+                                                            finalList,
+                                                            widget.city,
+                                                            "search"),
+                                              ),
+                                            )
+                                          : Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder:
+                                                    (BuildContext context) =>
+                                                        Googlemap(
+                                                            initList,
+                                                            widget.city,
+                                                            "search"),
+                                              ),
+                                            );
+                                    }
+                                  },
+                                  child: Container(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(9, 0, 9, 0),
+                                    height: 30,
+                                    decoration: BoxDecoration(
+                                      boxShadow: [
+                                        BoxShadow(
+                                            color: Colors.grey.shade200,
+                                            // offset: const Offset),
+                                            blurRadius: 0,
+                                            spreadRadius: 1)
+                                      ],
+                                      color: Colors.white,
+                                      // color: Theme.of(context).primaryColor,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
                                     child: Center(
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          Align(
-                                            alignment:
-                                                AlignmentDirectional.topEnd,
-                                            child: InkWell(
-                                              onTap: () {
-                                                setState(() {
-                                                  CitySelector = false;
-                                                  globals.secondcall = false;
-                                                  nearboolmarker =
-                                                      !nearboolmarker;
-                                                  if (nearboolmarker) {
-                                                    FFAppState().cityname = '';
-                                                    print("true");
-                                                    templat = FFAppState().lat;
-                                                    templong = FFAppState().lon;
-                                                    initList.clear();
-                                                    globalslat =
-                                                        FFAppState().lat;
-                                                    print(globalslat);
-                                                    globalslong =
-                                                        FFAppState().lon;
-                                                    print(globalslong);
-                                                  } else {
-                                                    print("false");
-                                                    templat = globalslat;
-                                                    templong = globalslong;
-                                                    initList.clear();
-                                                    globalslat = templat;
-                                                    globalslong = templong;
-                                                  }
-                                                });
-                                              },
-                                              child: Container(
-                                                padding:
-                                                    const EdgeInsets.fromLTRB(
-                                                        9, 0, 9, 0),
-                                                height: 30,
-                                                decoration: BoxDecoration(
-                                                  boxShadow: [
-                                                    BoxShadow(
-                                                        color: Colors
-                                                            .grey.shade200,
-                                                        // offset: const Offset),
-                                                        blurRadius: 0,
-                                                        spreadRadius: 1)
-                                                  ],
-                                                  color: nearboolmarker
-                                                      ? FlutterFlowTheme.of(
-                                                              context)
-                                                          .alternate
-                                                      : Colors.white,
-                                                  // color: Theme.of(context).primaryColor,
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                ),
-                                                child: Center(
-                                                  child: InkWell(
-                                                    child: RichText(
-                                                      text: TextSpan(
-                                                        children: [
-                                                          TextSpan(
-                                                            style: TextStyle(
-                                                                color: nearboolmarker
-                                                                    ? Colors
-                                                                        .white
-                                                                    : Colors
-                                                                        .black45,
-                                                                fontSize: 16),
-                                                            text: "Near me ",
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
+                                      child: InkWell(
+                                        child: RichText(
+                                          text: TextSpan(
+                                            children: [
+                                              TextSpan(
+                                                style: TextStyle(
+                                                    color: Color.fromARGB(
+                                                        115, 4, 122, 186),
+                                                    fontSize: 16,
+                                                    fontWeight:
+                                                        FontWeight.normal),
+                                                text: "  Map  ",
                                               ),
-                                            ),
+                                            ],
                                           ),
-                                          const SizedBox(
-                                            width: 10,
-                                          ),
-                                          Align(
-                                            alignment:
-                                                AlignmentDirectional.center,
-                                            child: InkWell(
-                                              onTap: () {
-                                                setState(() {
-                                                  CitySelector = !CitySelector;
-                                                });
-                                              },
-                                              child: Container(
-                                                padding:
-                                                    const EdgeInsets.fromLTRB(
-                                                        9, 0, 9, 0),
-                                                height: 30,
-                                                decoration: BoxDecoration(
-                                                  boxShadow: [
-                                                    BoxShadow(
-                                                        color: Colors
-                                                            .grey.shade200,
-                                                        // offset: const Offset),
-                                                        blurRadius: 0,
-                                                        spreadRadius: 1)
-                                                  ],
-                                                  color:
-                                                      FFAppState().cityname !=
-                                                              ""
-                                                          ? FlutterFlowTheme.of(
-                                                                  context)
-                                                              .alternate
-                                                          : Colors.white,
-                                                  // color: Theme.of(context).primaryColor,
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                ),
-                                                child: Center(
-                                                  child: InkWell(
-                                                    child: RichText(
-                                                      text: TextSpan(
-                                                        children: [
-                                                          TextSpan(
-                                                            style: TextStyle(
-                                                                color: FFAppState()
-                                                                            .cityname !=
-                                                                        ""
-                                                                    ? Colors
-                                                                        .white
-                                                                    : Colors
-                                                                        .black45,
-                                                                fontSize: 16),
-                                                            text: FFAppState()
-                                                                        .cityname ==
-                                                                    ""
-                                                                ? "Select City"
-                                                                : FFAppState()
-                                                                    .cityname,
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            width: 10,
-                                          ),
-                                          Align(
-                                            alignment:
-                                                AlignmentDirectional.center,
-                                            child: InkWell(
-                                              onTap: () {
-                                                openFilterDialog();
-                                                setState(() {
-                                                  CitySelector = false;
-                                                });
-                                              },
-                                              child: Container(
-                                                padding:
-                                                    const EdgeInsets.fromLTRB(
-                                                        9, 0, 9, 0),
-                                                height: 30,
-                                                decoration: BoxDecoration(
-                                                  boxShadow: [
-                                                    BoxShadow(
-                                                        color: Colors
-                                                            .grey.shade200,
-                                                        // offset: const Offset),
-                                                        blurRadius: 0,
-                                                        spreadRadius: 1)
-                                                  ],
-                                                  color: selectedUserList!
-                                                          .isNotEmpty
-                                                      ? FlutterFlowTheme.of(
-                                                              context)
-                                                          .alternate
-                                                      : Colors.white,
-                                                  // color: Theme.of(context).primaryColor,
-                                                  borderRadius:
-                                                      BorderRadius.circular(8),
-                                                ),
-                                                child: Center(
-                                                  child: InkWell(
-                                                    child: RichText(
-                                                      text: TextSpan(
-                                                        children: [
-                                                          TextSpan(
-                                                            style: TextStyle(
-                                                                color: selectedUserList!
-                                                                        .isNotEmpty
-                                                                    ? Colors
-                                                                        .white
-                                                                    : Colors
-                                                                        .black45,
-                                                                fontSize: 16),
-                                                            text: selectedUserList!
-                                                                    .isNotEmpty
-                                                                ? "Filter ${selectedUserList!.length}"
-                                                                : "Filter",
-                                                          ),
-                                                          WidgetSpan(
-                                                            child: selectedUserList!
-                                                                    .isNotEmpty
-                                                                ? const Icon(
-                                                                    Icons
-                                                                        .arrow_drop_down,
-                                                                    size: 14,
-                                                                    color: Colors
-                                                                        .white,
-                                                                  )
-                                                                : const Icon(
-                                                                    Icons
-                                                                        .arrow_drop_down,
-                                                                    size: 14),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          // Align(
-                                          //   alignment: AlignmentDirectional.center,
-                                          //   child: InkWell(
-                                          //     onTap: openFilterDialog,
-                                          //     child: FilterCard("Filter"),
-                                          //   ),
-                                          // ),
-                                        ],
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ]),
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      CitySelector = false;
+                                      globals.secondcall = false;
+                                      nearboolmarker = !nearboolmarker;
+                                      if (nearboolmarker) {
+                                        FFAppState().cityname = '';
+                                        print("true");
+                                        templat = FFAppState().lat;
+                                        templong = FFAppState().lon;
+                                        initList.clear();
+                                        globalslat = FFAppState().lat;
+                                        print(globalslat);
+                                        globalslong = FFAppState().lon;
+                                        print(globalslong);
+                                      } else {
+                                        print("false");
+                                        templat = globalslat;
+                                        templong = globalslong;
+                                        initList.clear();
+                                        globalslat = templat;
+                                        globalslong = templong;
+                                      }
+                                    });
+                                  },
+                                  child: Container(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(9, 0, 9, 0),
+                                    height: 30,
+                                    decoration: BoxDecoration(
+                                      boxShadow: [
+                                        BoxShadow(
+                                            color: Colors.grey.shade200,
+                                            // offset: const Offset),
+                                            blurRadius: 0,
+                                            spreadRadius: 1)
+                                      ],
+                                      color: nearboolmarker
+                                          ? FlutterFlowTheme.of(context)
+                                              .alternate
+                                          : Colors.white,
+                                      // color: Theme.of(context).primaryColor,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Center(
+                                      child: InkWell(
+                                        child: RichText(
+                                          text: TextSpan(
+                                            children: [
+                                              TextSpan(
+                                                style: TextStyle(
+                                                    color: nearboolmarker
+                                                        ? Colors.white
+                                                        : Colors.black45,
+                                                    fontSize: 16),
+                                                text: "Near me ",
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () {
+                                    setState(() {
+                                      CitySelector = !CitySelector;
+                                    });
+                                  },
+                                  child: Container(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(9, 0, 9, 0),
+                                    height: 30,
+                                    decoration: BoxDecoration(
+                                      boxShadow: [
+                                        BoxShadow(
+                                            color: Colors.grey.shade200,
+                                            // offset: const Offset),
+                                            blurRadius: 0,
+                                            spreadRadius: 1)
+                                      ],
+                                      color: FFAppState().cityname != ""
+                                          ? FlutterFlowTheme.of(context)
+                                              .alternate
+                                          : Colors.white,
+                                      // color: Theme.of(context).primaryColor,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Center(
+                                      child: InkWell(
+                                        child: RichText(
+                                          text: TextSpan(
+                                            children: [
+                                              TextSpan(
+                                                style: TextStyle(
+                                                    color:
+                                                        FFAppState().cityname !=
+                                                                ""
+                                                            ? Colors.white
+                                                            : Colors.black45,
+                                                    fontSize: 16),
+                                                text:
+                                                    FFAppState().cityname == ""
+                                                        ? "Select City"
+                                                        : FFAppState().cityname,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(
+                                width: 10,
+                              ),
+                              Expanded(
+                                child: InkWell(
+                                  onTap: () {
+                                    openFilterDialog();
+                                    setState(() {
+                                      CitySelector = false;
+                                    });
+                                  },
+                                  child: Container(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(9, 0, 9, 0),
+                                    height: 30,
+                                    decoration: BoxDecoration(
+                                      boxShadow: [
+                                        BoxShadow(
+                                            color: Colors.grey.shade200,
+                                            // offset: const Offset),
+                                            blurRadius: 0,
+                                            spreadRadius: 1)
+                                      ],
+                                      color: selectedUserList!.isNotEmpty
+                                          ? FlutterFlowTheme.of(context)
+                                              .alternate
+                                          : Colors.white,
+                                      // color: Theme.of(context).primaryColor,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Center(
+                                      child: InkWell(
+                                        child: RichText(
+                                          text: TextSpan(
+                                            children: [
+                                              TextSpan(
+                                                style: TextStyle(
+                                                    color: selectedUserList!
+                                                            .isNotEmpty
+                                                        ? Colors.white
+                                                        : Colors.black45,
+                                                    fontSize: 16),
+                                                text: selectedUserList!
+                                                        .isNotEmpty
+                                                    ? "Filter ${selectedUserList!.length}"
+                                                    : "Filter",
+                                              ),
+                                              // WidgetSpan(
+                                              //   child: selectedUserList!.isNotEmpty
+                                              //       ? const Icon(
+                                              //           Icons.arrow_drop_down,
+                                              //           size: 14,
+                                              //           color: Colors.white,
+                                              //         )
+                                              //       : const Icon(
+                                              //           Icons.arrow_drop_down,
+                                              //           size: 14),
+                                              // ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ]),
                           ),
                         ),
                       ),
@@ -642,78 +667,82 @@ class _SearchState extends river.ConsumerState<Search> {
                                       // snapshot.connectionState == ConnectionState.waiting
                                       if (snapshot.connectionState ==
                                           ConnectionState.waiting) {
-                                        return Shimmer.fromColors(
-                                          baseColor: Colors.grey.shade300,
-                                          highlightColor: Colors.white,
-                                          child: Center(
-                                            child: ListView.builder(
-                                              itemBuilder: (_, __) => Padding(
-                                                padding: const EdgeInsets.only(
-                                                    bottom: 0.0),
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.fromLTRB(
-                                                          8.0, 8, 8, 1),
-                                                  child: Row(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: <Widget>[
-                                                      Center(
-                                                        child: Container(
-                                                          width: 350.0,
-                                                          height: 300.0,
-                                                          color: Colors.white,
-                                                        ),
-                                                      ),
-                                                      const Padding(
-                                                        padding: EdgeInsets
-                                                            .symmetric(
-                                                                horizontal:
-                                                                    10.0),
-                                                      ),
-                                                      // Expanded(
-                                                      //   child: Column(
-                                                      //     crossAxisAlignment:
-                                                      //         CrossAxisAlignment.start,
-                                                      //     children: <Widget>[
-                                                      //       const Padding(
-                                                      //           padding: EdgeInsets.only(
-                                                      //               top: 5)),
-                                                      //       Container(
-                                                      //         width: double.infinity,
-                                                      //         height: 10.0,
-                                                      //         color: Colors.white,
-                                                      //       ),
-                                                      //       const Padding(
-                                                      //         padding: EdgeInsets.symmetric(
-                                                      //             vertical: 5.0),
-                                                      //       ),
-                                                      //       Container(
-                                                      //         width: double.infinity,
-                                                      //         height: 10.0,
-                                                      //         color: Colors.white,
-                                                      //       ),
-                                                      //       const Padding(
-                                                      //         padding: EdgeInsets.symmetric(
-                                                      //             vertical: 5.0),
-                                                      //       ),
-                                                      //       Container(
-                                                      //         width: 40.0,
-                                                      //         height: 8.0,
-                                                      //         color: Colors.white,
-                                                      //       ),
-                                                      //     ],
-                                                      //   ),
-                                                      // )
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                              // itemCount: 10,
-                                            ),
-                                          ),
+                                        return Center(
+                                          child: CircularProgressIndicator(
+                                              color: Colors.blueAccent),
                                         );
+                                        // return Shimmer.fromColors(
+                                        //   baseColor: Colors.grey.shade300,
+                                        //   highlightColor: Colors.white,
+                                        //   child: Center(
+                                        //     child: ListView.builder(
+                                        //       itemBuilder: (_, __) => Padding(
+                                        //         padding: const EdgeInsets.only(
+                                        //             bottom: 0.0),
+                                        //         child: Padding(
+                                        //           padding:
+                                        //               const EdgeInsets.fromLTRB(
+                                        //                   8.0, 8, 8, 1),
+                                        //           child: Row(
+                                        //             crossAxisAlignment:
+                                        //                 CrossAxisAlignment
+                                        //                     .start,
+                                        //             children: <Widget>[
+                                        //               Center(
+                                        //                 child: Container(
+                                        //                   width: 350.0,
+                                        //                   height: 300.0,
+                                        //                   color: Colors.white,
+                                        //                 ),
+                                        //               ),
+                                        //               const Padding(
+                                        //                 padding: EdgeInsets
+                                        //                     .symmetric(
+                                        //                         horizontal:
+                                        //                             10.0),
+                                        //               ),
+                                        //               // Expanded(
+                                        //               //   child: Column(
+                                        //               //     crossAxisAlignment:
+                                        //               //         CrossAxisAlignment.start,
+                                        //               //     children: <Widget>[
+                                        //               //       const Padding(
+                                        //               //           padding: EdgeInsets.only(
+                                        //               //               top: 5)),
+                                        //               //       Container(
+                                        //               //         width: double.infinity,
+                                        //               //         height: 10.0,
+                                        //               //         color: Colors.white,
+                                        //               //       ),
+                                        //               //       const Padding(
+                                        //               //         padding: EdgeInsets.symmetric(
+                                        //               //             vertical: 5.0),
+                                        //               //       ),
+                                        //               //       Container(
+                                        //               //         width: double.infinity,
+                                        //               //         height: 10.0,
+                                        //               //         color: Colors.white,
+                                        //               //       ),
+                                        //               //       const Padding(
+                                        //               //         padding: EdgeInsets.symmetric(
+                                        //               //             vertical: 5.0),
+                                        //               //       ),
+                                        //               //       Container(
+                                        //               //         width: 40.0,
+                                        //               //         height: 8.0,
+                                        //               //         color: Colors.white,
+                                        //               //       ),
+                                        //               //     ],
+                                        //               //   ),
+                                        //               // )
+                                        //             ],
+                                        //           ),
+                                        //         ),
+                                        //       ),
+                                        //       // itemCount: 10,
+                                        //     ),
+                                        //   ),
+                                        // );
                                       }
                                       print("sdfskdfklsdf hello");
 
@@ -882,7 +911,7 @@ class _SearchState extends river.ConsumerState<Search> {
                                                           Radius.circular(30),
                                                         ),
                                                       ),
-                                                      width: 180.0,
+                                                      width: 280.0,
                                                       child: Padding(
                                                         padding:
                                                             const EdgeInsets
@@ -1007,35 +1036,35 @@ class _SearchState extends river.ConsumerState<Search> {
                       : Container(),
                 ]),
               ),
-        floatingActionButton: Container(
-          margin: EdgeInsets.symmetric(
-              vertical: 0, horizontal: width < 800 ? 13 : width * 0.24),
-          child: GestureDetector(
-              onTap: (() {
-                print("clicked google map button");
-                if (initList.isEmpty) {
-                  initList = initListWithoutLocation;
-                }
-                if (initList.isNotEmpty || initListWithoutLocation.isNotEmpty) {
-                  selectedUserList!.isNotEmpty
-                      ? Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (BuildContext context) =>
-                                Googlemap(finalList, widget.city, "search"),
-                          ),
-                        )
-                      : Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (BuildContext context) =>
-                                Googlemap(initList, widget.city, "search"),
-                          ),
-                        );
-                }
-              }),
-              child: const GoogleMapCircle()),
-        ),
+        // floatingActionButton: Container(
+        //   margin: EdgeInsets.symmetric(
+        //       vertical: 0, horizontal: width < 800 ? 13 : width * 0.24),
+        //   child: GestureDetector(
+        //       onTap: (() {
+        //         print("clicked google map button");
+        //         if (initList.isEmpty) {
+        //           initList = initListWithoutLocation;
+        //         }
+        //         if (initList.isNotEmpty || initListWithoutLocation.isNotEmpty) {
+        //           selectedUserList!.isNotEmpty
+        //               ? Navigator.push(
+        //                   context,
+        //                   MaterialPageRoute(
+        //                     builder: (BuildContext context) =>
+        //                         Googlemap(finalList, widget.city, "search"),
+        //                   ),
+        //                 )
+        //               : Navigator.push(
+        //                   context,
+        //                   MaterialPageRoute(
+        //                     builder: (BuildContext context) =>
+        //                         Googlemap(initList, widget.city, "search"),
+        //                   ),
+        //                 );
+        //         }
+        //       }),
+        //       child: const GoogleMapCircle()),
+        // ),
         // drawer: Drawer(
         //   child: Container(
         //     height: 55,

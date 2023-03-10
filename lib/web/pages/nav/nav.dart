@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart' as go;
 import 'package:page_transition/page_transition.dart';
 import '../../Widgets/bottom_nav_bar.dart';
+import '../list_property/agreement_document.dart';
+import '../list_property/flutter_flow/flutter_flow_util.dart';
 import '../property_detail/property_detail.dart';
 import '../splashscreen.dart';
 import '../list_property/home_page/home_page_widget.dart';
@@ -29,14 +31,6 @@ class AppStateNotifier extends ChangeNotifier {
     showSplashImage = false;
     notifyListeners();
   }
-}
-
-enum UrlPathStrategy {
-  /// Use hash url strategy.
-  hash,
-
-  /// Use path url strategy.
-  path,
 }
 
 go.GoRouter createRouter(AppStateNotifier appStateNotifier) => go.GoRouter(
@@ -66,12 +60,18 @@ go.GoRouter createRouter(AppStateNotifier appStateNotifier) => go.GoRouter(
             FFRoute(
               name: 'property',
               path: 'property',
-              builder: (context, params) =>Property(detail: params.getParam("detail", ParamType.Document)),
+              builder: (context, params) => Property(
+                  detail: params.getParam("detail", ParamType.Document)),
             ),
             FFRoute(
               name: 'HomePage',
               path: 'homePage',
               builder: (context, params) => ListPropertyPage(),
+            ),
+            FFRoute(
+              name: 'policy',
+              path: 'policy',
+              builder: (context, params) => AgreementDocument(),
             ),
             FFRoute(
               name: 'uploadproperty',

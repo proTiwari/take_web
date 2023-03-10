@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import '../../web1/globar_variables/globals.dart';
+import '../../web/globar_variables/globals.dart';
 import '../firebase_functions/firebase_fun.dart';
 import '../globar_variables/globals.dart';
 import '../pages/explore_page/googlemap.dart';
